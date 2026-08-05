@@ -1,0 +1,30 @@
+# Exclusiones de Indexación y Búsqueda para Ahorro de Tokens
+
+# Historial y archivos obsoletos
+**/99_Archive/
+**/99_Archive/**
+**/*_vOLD*
+**/*.resolved.*
+
+# Documentos binarios pesados (ya mantenemos la fuente de verdad en .md)
+**/*.docx
+**/*.xlsx
+**/*.pptx
+**/*.pdf
+**/*.zip
+**/*.rar
+
+# Imágenes y recursos multimedia
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.svg
+**/*.gif
+**/*.bmp
+**/*.ico
+
+# Carpetas de ecosistema heredadas o eliminadas
+00_Proposals/
+Management/
+tmp/
+temp/
