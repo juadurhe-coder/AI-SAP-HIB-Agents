@@ -63,17 +63,16 @@ const HEADERS = {
 
 const CUTOFF_DATE = new Date('2026-04-30T12:00:00Z');
 
-const IGNORED_PATHS = [
-  '\\.git',
-  '\\.gemini',
-  '\\node_modules',
-  '\\test_office_automation',
-  '\\browser_recordings',
-  '\\.system_generated'
-];
-
 function shouldIgnore(filePath) {
-  return IGNORED_PATHS.some(pattern => new RegExp(pattern, 'i').test(filePath));
+  const norm = filePath.replace(/\\/g, '/').toLowerCase();
+  return norm.includes('/.git/') || 
+         norm.includes('/node_modules/') || 
+         norm.includes('/.gemini/') || 
+         norm.includes('/.system_generated/') || 
+         norm.includes('/test_office_automation/') || 
+         norm.includes('/browser_recordings/') || 
+         norm.includes('/dist/') || 
+         norm.includes('/build/');
 }
 
 function getWorkspaceFiles(dir, includeProjects = true, fileList = []) {

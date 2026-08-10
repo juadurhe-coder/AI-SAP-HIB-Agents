@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Script de auditoria de integridad, sintaxis y Clean Code para scripts (.ps1 y .js) en .agents/scripts/.
+    Script de auditoria de integridad, sintaxis, verbos oficiales y Clean Code para scripts (.ps1 y .js) en .agents/scripts/.
 .DESCRIPTION
     Realiza parsing AST en PowerShell, comprobaciones de sintaxis con Node.js en JavaScript,
-    y deteccion de bloques de codigo duplicados/repetidos (Clean Code).
+    deteccion de verbos oficiales (PSUseApprovedVerbs) y bloques de codigo duplicados/repetidos.
 #>
 
 param(
@@ -12,7 +12,7 @@ param(
 
 $scriptsDir = $PSScriptRoot
 Write-Host "========================================================================" -ForegroundColor Cyan
-Write-Host " AUTOMATIZACION DE INTEGRIDAD Y SINTAXIS DE SCRIPTS (CLEAN CODE)" -ForegroundColor Cyan
+Write-Host " AUTOMATIZACION DE INTEGRIDAD, SINTAXIS Y CLEAN CODE EN SCRIPTS" -ForegroundColor Cyan
 Write-Host "========================================================================" -ForegroundColor Cyan
 Write-Host "Ruta auditada: $scriptsDir"
 Write-Host ""
@@ -24,7 +24,20 @@ $totalPassed = 0
 $totalErrors = 0
 $totalWarnings = 0
 
-function Check-DuplicateBlocks {
+$approvedVerbs = @(
+    'Add', 'Approve', 'Assert', 'Build', 'Clear', 'Close', 'Compare', 'Compress', 'Confirm', 'Connect',
+    'Convert', 'ConvertFrom', 'ConvertTo', 'Copy', 'Debug', 'Deny', 'Disable', 'Disconnect', 'Dismount',
+    'Edit', 'Enable', 'Enter', 'Exit', 'Expand', 'Export', 'Find', 'Format', 'Get', 'Grant', 'Group',
+    'Hide', 'Import', 'Initialize', 'Install', 'Invoke', 'Join', 'Limit', 'Lock', 'Measure', 'Merge',
+    'Mount', 'Move', 'New', 'Open', 'Optimize', 'Out', 'Ping', 'Pop', 'Protect', 'Publish', 'Push',
+    'Read', 'Receive', 'Redo', 'Register', 'Remove', 'Rename', 'Repair', 'Request', 'Reset', 'Resize',
+    'Resolve', 'Restart', 'Restore', 'Resume', 'Revoke', 'Save', 'Search', 'Select', 'Send', 'Set',
+    'Show', 'Skip', 'Split', 'Start', 'Step', 'Stop', 'Submit', 'Suspend', 'Switch', 'Sync', 'Test',
+    'Trace', 'Unbind', 'Undo', 'Uninitialize', 'Uninstall', 'Unlock', 'Unprotect', 'Unpublish',
+    'Unregister', 'Update', 'Use', 'Wait', 'Watch', 'Write'
+)
+
+function Test-DuplicateBlock {
     param([string]$filePath, [string]$fileName)
     $lines = [System.IO.File]::ReadAllLines($filePath, [System.Text.Encoding]::UTF8)
     $windowSize = 3
@@ -52,7 +65,7 @@ function Check-DuplicateBlocks {
                 $prevEnd = $seenBlocks[$blockKey].End
                 # Evitar reportar solapamientos inmediatos de 1 linea
                 if ($startLine -gt $prevEnd) {
-                    Write-Host " [WARN] $fileName tiene un bloque duplicado (Lineas $startLine-$endLine idénticas a $prevStart-$prevEnd)" -ForegroundColor Yellow
+                    Write-Host " [WARN] $fileName tiene un bloque duplicado (Lineas $startLine-$endLine identicas a $prevStart-$prevEnd)" -ForegroundColor Yellow
                     $warningsCount++
                 }
             } else {
@@ -74,7 +87,7 @@ foreach ($file in $psFiles) {
     # 1.1 Parsing AST para errores de sintaxis
     $parseErrors = $null
     $tokens = $null
-    [System.Management.Automation.Language.Parser]::ParseFile($filePath, [ref]$tokens, [ref]$parseErrors) | Out-Null
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile($filePath, [ref]$tokens, [ref]$parseErrors)
 
     if ($parseErrors.Count -gt 0) {
         $filePassed = $false
@@ -85,21 +98,39 @@ foreach ($file in $psFiles) {
         }
     }
 
-    # 1.2 Comprobar asignacion a variables automaticas ($matches = ...)
+    # 1.2 Inspeccionar funciones declaradas mediante AST para Verbos Oficiales (PSUseApprovedVerbs)
+    if ($null -ne $ast) {
+        $functions = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+        foreach ($func in $functions) {
+            if ($func.Name -match '^(?<Verb>[^-]+)-(?<Noun>.+)$') {
+                $verb = $Matches['Verb']
+                $noun = $Matches['Noun']
+                
+                # Validar verbo oficial
+                $matchedApproved = $approvedVerbs | Where-Object { $_ -eq $verb }
+                if (-not $matchedApproved) {
+                    Write-Host " [WARN] $fileName : La funcion '$($func.Name)' usa un verbo no oficial de PowerShell ('$verb'). Usar Test, Find, Get, Set, etc." -ForegroundColor Yellow
+                    $totalWarnings++
+                }
+            }
+        }
+    }
+
+    # 1.3 Comprobar asignacion a variables automaticas ($matches = ...)
     $content = [System.IO.File]::ReadAllText($filePath, [System.Text.Encoding]::UTF8)
     if ($content -match '^\s*\$matches\s*=' -or $content -match ';\s*\$matches\s*=') {
         Write-Host " [WARN] $fileName reasigna la variable automatica `$matches." -ForegroundColor Yellow
         $totalWarnings++
     }
 
-    # 1.3 Comprobar objetos COM sin limpieza ReleaseComObject
+    # 1.4 Comprobar objetos COM sin limpieza ReleaseComObject
     if ($content -match 'New-Object\s+-ComObject' -and $content -notmatch 'ReleaseComObject') {
         Write-Host " [WARN] $fileName inicializa objetos COM sin invocar ReleaseComObject en bloque finally." -ForegroundColor Yellow
         $totalWarnings++
     }
 
-    # 1.4 Deteccion de bloques duplicados
-    $dupWarns = Check-DuplicateBlocks -filePath $filePath -fileName $fileName
+    # 1.5 Deteccion de bloques duplicados
+    $dupWarns = Test-DuplicateBlock -filePath $filePath -fileName $fileName
     $totalWarnings += $dupWarns
 
     if ($filePassed -and $parseErrors.Count -eq 0) {
@@ -125,7 +156,7 @@ if ($nodeCmd) {
             $totalErrors++
         } else {
             # Deteccion de bloques duplicados
-            $dupWarns = Check-DuplicateBlocks -filePath $filePath -fileName $fileName
+            $dupWarns = Test-DuplicateBlock -filePath $filePath -fileName $fileName
             $totalWarnings += $dupWarns
             Write-Host " [PASS] $fileName (Node --check OK)" -ForegroundColor Green
             $totalPassed++

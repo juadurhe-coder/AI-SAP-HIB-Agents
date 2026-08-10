@@ -131,7 +131,7 @@ Para evitar la pérdida de contexto y directrices de negocio críticas al inicia
 
 ## 13. LINTER DE GOBERNANZA DE PROYECTOS (PROJECT GOVERNANCE LINTER)
 Para asegurar que los agentes y el equipo humano cumplen rigurosamente la nomenclatura y presencia de memorias persistentes, se cuenta con un script de linter estático:
-- **Ejecución CLI:** `node .agents/scripts/check-governance.js` o PowerShell `.agents/scripts/Test-GovernanceCompliance.ps1`.
+- **Ejecución CLI:** `node .agents/scripts/check-governance.js` o `powershell -ExecutionPolicy Bypass -File .agents\scripts\Test-ScriptIntegrity.ps1`.
 - **Reglas Auditadas:**
   1. Presencia obligatoria de `00_Project_Memory.md` en la raíz de cada subcarpeta de `Projects/`.
   2. Cumplimiento estricto de prefijos numéricos `00_` a `06_` en todos los archivos de entregables.
