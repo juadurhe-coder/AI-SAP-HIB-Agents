@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-    Script de Inicialización y Sincronización Automática de Antigravity IDE
+    Script de Inicializacion y Sincronizacion Automatica de Antigravity IDE
 .DESCRIPTION
     Configura el entorno local del usuario en cualquier ordenador nuevo, sincronizando
-    los agentes, reglas globales y verificando las carpetas de configuración.
+    los agentes, reglas globales y verificando las carpetas de configuracion.
 #>
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "===============================================================" -ForegroundColor Cyan
-Write-Host " 🚀 INICIALIZADOR AUTOMÁTICO DE CONFIGURACIÓN ANTIGRAVITY IDE " -ForegroundColor Cyan
+Write-Host " INICIALIZADOR AUTOMATICO DE CONFIGURACION ANTIGRAVITY IDE " -ForegroundColor Cyan
 Write-Host "===============================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -19,18 +19,18 @@ $userProfilePath = $env:USERPROFILE
 $geminiConfigDir = Join-Path $userProfilePath ".gemini\config"
 $geminiIdeDir = Join-Path $userProfilePath ".gemini\antigravity-ide"
 
-Write-Host "📂 Directorio del Workspace: $workspacePath" -ForegroundColor Yellow
-Write-Host "👤 Perfil de Usuario Local: $userProfilePath" -ForegroundColor Yellow
+Write-Host "Directorio del Workspace: $workspacePath" -ForegroundColor Yellow
+Write-Host "Perfil de Usuario Local: $userProfilePath" -ForegroundColor Yellow
 Write-Host ""
 
 # 2. Verificar o crear carpetas globales .gemini
 if (-not (Test-Path $geminiConfigDir)) {
-    Write-Host "⚙️ Creando directorio de configuración global (.gemini\config)..." -ForegroundColor Gray
+    Write-Host "Creando directorio de configuracion global (.gemini\config)..." -ForegroundColor Gray
     New-Item -Path $geminiConfigDir -ItemType Directory -Force | Out-Null
 }
 
 if (-not (Test-Path $geminiIdeDir)) {
-    Write-Host "⚙️ Creando directorio del IDE (.gemini\antigravity-ide)..." -ForegroundColor Gray
+    Write-Host "Creando directorio del IDE (.gemini\antigravity-ide)..." -ForegroundColor Gray
     New-Item -Path $geminiIdeDir -ItemType Directory -Force | Out-Null
 }
 
@@ -39,7 +39,7 @@ $globalAgentsMd = Join-Path $geminiConfigDir "AGENTS.md"
 $workspaceAgentsMd = Join-Path $workspacePath ".agents\AGENTS.md"
 
 if (Test-Path $workspaceAgentsMd) {
-    Write-Host "📋 Sincronizando regla global AGENTS.md..." -ForegroundColor Gray
+    Write-Host "Sincronizando regla global AGENTS.md..." -ForegroundColor Gray
     Copy-Item -Path $workspaceAgentsMd -Destination $globalAgentsMd -Force
     Write-Host "   -> Copiado exitosamente a: $globalAgentsMd" -ForegroundColor Green
 }
@@ -53,7 +53,7 @@ $components = @(
 )
 
 Write-Host ""
-Write-Host "🔍 Verificando integridad de componentes del ecosistema multi-agente:" -ForegroundColor Yellow
+Write-Host "Verificando integridad de componentes del ecosistema multi-agente:" -ForegroundColor Yellow
 foreach ($comp in $components) {
     $fullPath = Join-Path $workspacePath $comp.Path
     if (Test-Path $fullPath) {
@@ -65,8 +65,6 @@ foreach ($comp in $components) {
 
 Write-Host ""
 Write-Host "===============================================================" -ForegroundColor Cyan
-Write-Host " 🎉 ¡ENTORNO CONFIGURADO Y LISTO PARA USAR!                    " -ForegroundColor Green
-Write-Host " Antigravity IDE detectará automáticamente todos los roles,     " -ForegroundColor White
-Write-Host " reglas y flujos de trabajo de este proyecto.                   " -ForegroundColor White
+Write-Host " ENTORNO CONFIGURADO Y LISTO PARA USAR!                        " -ForegroundColor Green
 Write-Host "===============================================================" -ForegroundColor Cyan
 Write-Host ""

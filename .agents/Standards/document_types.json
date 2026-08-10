@@ -1,0 +1,87 @@
+{
+  "version": "1.0",
+  "description": "Catálogo unificado y Fuente Única de Verdad (SSOT) para tipos de documentos y nomenclatura en el ecosistema SAP PMO, alineado con las fases de SAP Activate.",
+  "types": [
+    {
+      "prefix": "00_",
+      "code": "PM",
+      "name": "Project Memory / Readme",
+      "phase": "Run / Cierre",
+      "description": "Fichero de memoria persistente del proyecto y contexto general a largo plazo.",
+      "template": "project_memory_template.md",
+      "keywords": ["project_memory", "memoria"]
+    },
+    {
+      "prefix": "01_",
+      "code": "PR",
+      "name": "Proposal / Business Case / RFP",
+      "phase": "Discover",
+      "description": "Propuesta comercial, de valor, concepto inicial o RFP de preventa.",
+      "template": "proposal_template.md",
+      "keywords": ["proposal", "propuesta", "rfp", "business_case"]
+    },
+    {
+      "prefix": "02_",
+      "code": "BPD",
+      "name": "Business Process Document / Fit-to-Standard",
+      "phase": "Explore",
+      "description": "Documento de proceso de negocio, talleres Fit-to-Standard y mapas de procesos.",
+      "template": "bpd_template.md",
+      "keywords": ["bpd", "fit_to_standard", "process", "proceso"]
+    },
+    {
+      "prefix": "03_",
+      "code": "FS",
+      "name": "Functional Specification (FS)",
+      "phase": "Realize",
+      "description": "Especificación funcional detallada con reglas de negocio y lógica funcional.",
+      "template": "functional_spec_template.md",
+      "keywords": ["fs", "functional_spec", "funcional"]
+    },
+    {
+      "prefix": "04_",
+      "code": "TS",
+      "name": "Technical Specification (TS)",
+      "phase": "Realize",
+      "description": "Especificación técnica unificada (Backend ABAP/CAP/CDS y Frontend Fiori/UI5).",
+      "template": "technical_spec_template.md",
+      "keywords": ["ts", "technical_spec", "backend", "frontend", "tecnica"]
+    },
+    {
+      "prefix": "05_",
+      "code": "UM",
+      "name": "User Manual / Operating Guide",
+      "phase": "Realize / Deploy",
+      "description": "Manual de usuario final y guía paso a paso de operación con capturas.",
+      "template": "user_manual_template.md",
+      "keywords": ["um", "user_manual", "manual", "guia"]
+    },
+    {
+      "prefix": "06_",
+      "code": "TC",
+      "name": "Test Cases / UAT / Test Scripts",
+      "phase": "Deploy",
+      "description": "Escenarios de pruebas unitarias, integradas, scripts QA y aceptación UAT.",
+      "template": "test_cases_template.md",
+      "keywords": ["tc", "test", "uat", "qa", "pruebas"]
+    },
+    {
+      "prefix": "07_",
+      "code": "CO",
+      "name": "Cutover & Go-Live Plan / Runbook",
+      "phase": "Deploy",
+      "description": "Plan de traspaso a producción, checklists de Go-Live y runbooks de migración.",
+      "template": "cutover_plan_template.md",
+      "keywords": ["co", "cutover", "golive", "deploy", "migracion"]
+    },
+    {
+      "prefix": "08_",
+      "code": "PP",
+      "name": "Project Plan / Roadmap / Planning",
+      "phase": "Transversal",
+      "description": "Plan de proyecto, matriz RACI, roadmaps, fases SAP Activate e hitos.",
+      "template": "project_plan_template.md",
+      "keywords": ["pp", "project_plan", "roadmap", "planificacion", "plan"]
+    }
+  ]
+}

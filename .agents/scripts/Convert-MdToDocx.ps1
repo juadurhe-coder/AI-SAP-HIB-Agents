@@ -19,7 +19,7 @@ function Convert-MarkdownToHtml {
         $trimmed = $line.Trim()
         
         # Table parsing
-        if ($trimmed -like "|*|") {
+        if ($trimmed.StartsWith('|')) {
             if ($inList) {
                 $htmlLines.Add("</ul>")
                 $inList = $false
@@ -39,7 +39,8 @@ function Convert-MarkdownToHtml {
                 $htmlLines.Add("</thead>")
                 $htmlLines.Add("<tbody>")
                 $inTable = $true
-            } else {
+            }
+            else {
                 $htmlLines.Add("<tr>")
                 foreach ($col in $cols) {
                     $htmlLines.Add("<td>$($col.Trim())</td>")
@@ -47,7 +48,8 @@ function Convert-MarkdownToHtml {
                 $htmlLines.Add("</tr>")
             }
             continue
-        } else {
+        }
+        else {
             if ($inTable) {
                 $htmlLines.Add("</tbody>")
                 $htmlLines.Add("</table>")
@@ -55,67 +57,70 @@ function Convert-MarkdownToHtml {
             }
         }
         
-        # Headers
-        if ($trimmed -match '^#\s+(.*)$') {
-            if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
-            $htmlLines.Add("<h1>$($Matches[1])</h1>")
-        } elseif ($trimmed -match '^##\s+(.*)$') {
-            if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
-            $htmlLines.Add("<h2>$($Matches[1])</h2>")
-        } elseif ($trimmed -match '^###\s+(.*)$') {
-            if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
-            $htmlLines.Add("<h3>$($Matches[1])</h3>")
-        } elseif ($trimmed -match '^####\s+(.*)$') {
-            if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
-            $htmlLines.Add("<h4>$($Matches[1])</h4>")
+    # Headers
+    if ($trimmed -match '^#\s+(.*)$') {
+        if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
+        $htmlLines.Add("<h1>$($Matches[1])</h1>")
+    }
+    elseif ($trimmed -match '^##\s+(.*)$') {
+        if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
+        $htmlLines.Add("<h2>$($Matches[1])</h2>")
+    }
+    elseif ($trimmed -match '^###\s+(.*)$') {
+        if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
+        $htmlLines.Add("<h3>$($Matches[1])</h3>")
+    }
+    elseif ($trimmed -match '^####\s+(.*)$') {
+        if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
+        $htmlLines.Add("<h4>$($Matches[1])</h4>")
+    }
+    # Horizontal Rule
+    elseif ($trimmed -eq '---') {
+        if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
+        $htmlLines.Add("<hr />")
+    }
+    # Unordered List Items
+    elseif ($trimmed -match '^[\*\-]\s+(.*)$') {
+        if (-not $inList) {
+            $htmlLines.Add("<ul>")
+            $inList = $true
         }
-        # Horizontal Rule
-        elseif ($trimmed -eq '---') {
-            if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
-            $htmlLines.Add("<hr />")
-        }
-        # Unordered List Items
-        elseif ($trimmed -match '^[\*\-]\s+(.*)$') {
-            if (-not $inList) {
-                $htmlLines.Add("<ul>")
-                $inList = $true
-            }
-            $htmlLines.Add("<li>$($Matches[1])</li>")
-        }
-        # Empty Line
-        elseif ($trimmed -eq '') {
-            if ($inList) {
-                $htmlLines.Add("</ul>")
-                $inList = $false
-            }
-        }
-        # Blockquote
-        elseif ($trimmed -match '^>\s+(.*)$') {
-            if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
-            $htmlLines.Add("<blockquote>$($Matches[1])</blockquote>")
-        }
-        # Normal line
-        else {
-            if ($inList) {
-                $htmlLines.Add("</ul>")
-                $inList = $false
-            }
-            $htmlLines.Add("<p>$line</p>")
+        $htmlLines.Add("<li>$($Matches[1])</li>")
+    }
+    # Empty Line
+    elseif ($trimmed -eq '') {
+        if ($inList) {
+            $htmlLines.Add("</ul>")
+            $inList = $false
         }
     }
+    # Blockquote
+    elseif ($trimmed -match '^>\s+(.*)$') {
+        if ($inList) { $htmlLines.Add("</ul>"); $inList = $false }
+        $htmlLines.Add("<blockquote>$($Matches[1])</blockquote>")
+    }
+    # Normal line
+    else {
+        if ($inList) {
+            $htmlLines.Add("</ul>")
+            $inList = $false
+        }
+        $htmlLines.Add("<p>$line</p>")
+    }
+}
     
-    if ($inList) { $htmlLines.Add("</ul>") }
-    if ($inTable) { $htmlLines.Add("</tbody></table>") }
+if ($inList) { $htmlLines.Add("</ul>") }
+if ($inTable) { $htmlLines.Add("</tbody></table>") }
     
-    $result = $htmlLines -join "`n"
+$result = $htmlLines -join "`n"
     
-    # Inline formatting (bold, links, images, code)
-    $result = [regex]::Replace($result, '\*\*(.*?)\*\*', '<strong>$1</strong>')
-    $result = [regex]::Replace($result, '`(.*?)`', '<code>$1</code>')
-    $result = [regex]::Replace($result, '!\[(.*?)\]\((.*?)\)', '<img src=''$2'' alt=''$1'' />')
-    $result = [regex]::Replace($result, '\[(.*?)\]\((.*?)\)', '<a href=''$2''>$1</a>')
+# Inline formatting (bold, links, images, code)
+$result = [regex]::Replace($result, '\*\*(.*?)\*\*', '<strong>$1</strong>')
+$result = [regex]::Replace($result, '`(.*?)`', '<code>$1</code>')
+$result = [regex]::Replace($result, '!\[(.*?)\]\((.*?)\)', '<img src=''$2'' alt=''$1'' />')
+$result = [regex]::Replace($result, '\[(.*?)\]\((.*?)\)', '<a href=''$2''>$1</a>')
     
-    return $result
+return $result
 }
 
 if (Get-Command npx -ErrorAction SilentlyContinue) {
@@ -171,6 +176,12 @@ $styleBlock = @"
     }
     th {
         background-color: #2E74B5;
+    if (-not (Test-Path $tempHtml) -or (Get-Item $tempHtml).Length -eq 0) {
+        Write-Warning "npx marked no generó contenido válido. Utilizando motor de conversión interno de PowerShell..."
+        $mdContent = [System.IO.File]::ReadAllText($InputFilePath, [System.Text.Encoding]::UTF8)
+        $htmlContent = Convert-MarkdownToHtml $mdContent
+        [System.IO.File]::WriteAllText($tempHtml, $htmlContent, [System.Text.Encoding]::UTF8)
+    }
         color: #ffffff;
         font-weight: bold;
         text-align: left;
@@ -288,8 +299,9 @@ $word.Visible = $false
 $word.DisplayAlerts = 'wdAlertsNone'
 
 try {
-    # Abriendo como solo lectura
-    $wordDoc = $word.Documents.Open($tempHtml, $false, $true)
+    # Abriendo como solo lectura con ruta absoluta
+    $fullTempHtml = [System.IO.Path]::GetFullPath($tempHtml)
+    $wordDoc = $word.Documents.Open($fullTempHtml, $false, $true)
     
     # Aplicar Autoajuste dinámico al contenido para todas las tablas
     foreach ($table in $wordDoc.Tables) {
@@ -299,17 +311,90 @@ try {
     }
     
     # Formato 16 = wdFormatXMLDocument (.docx)
-    $wordDoc.SaveAs([ref]$OutputFilePath, [ref]16)
+    # Escalar la imagen de cabecera corporativa al 100% del ancho imprimible (468 pt / 16.5 cm)
+    if ($wordDoc.InlineShapes.Count -gt 0) {
+        $firstShape = $wordDoc.InlineShapes.Item(1)
+        if ($firstShape.Width -ne 468) {
+            $aspectRatio = $firstShape.Height / $firstShape.Width
+            $firstShape.Width = 468
+            $firstShape.Height = [Math]::Round(468 * $aspectRatio)
+        }
+    }
+
+
+    # Configurar Encabezado y Pie de Página estilo SAP / Hiberus en todas las secciones
+    foreach ($section in $wordDoc.Sections) {
+        # Encabezado (Header) - Tabulacion derecha exacta (468 pt) y linea inferior
+        $headerRange = $section.Headers.Item(1).Range # wdHeaderFooterPrimary = 1
+        $headerRange.Text = "$headerLeft`t$headerRight"
+        $headerRange.Font.Name = "Calibri"
+        $headerRange.Font.Size = 8.5
+        $headerRange.Font.Bold = 1
+        
+        # Limpiar tabulaciones por defecto y añadir Tabulación Derecha al margen (468 pt)
+        $headerRange.ParagraphFormat.TabStops.ClearAll()
+        $headerRange.ParagraphFormat.TabStops.Add(468, 2) | Out-Null # wdAlignTabRight = 2
+        
+        # Borde inferior fino en el párrafo del encabezado
+        try {
+            $headerRange.ParagraphFormat.Borders.Item(-3).LineStyle = 1 # wdBorderBottom = -3
+            $headerRange.ParagraphFormat.Borders.Item(-3).LineWidth = 4 # 0.5 pt
+        }
+        catch [System.Exception] {
+            # Ignorar si la propiedad de bordes no se aplica en la plantilla o sección
+            $null = $_
+        }
+        
+        # Pie de página (Footer)
+        $footerRange = $section.Footers.Item(1).Range # wdHeaderFooterPrimary = 1
+        $footerRange.ParagraphFormat.TabStops.ClearAll()
+        $footerRange.ParagraphFormat.TabStops.Add(234, 1) | Out-Null # Tabulación centro (234 pt)
+        $footerRange.ParagraphFormat.TabStops.Add(468, 2) | Out-Null # Tabulación derecha (468 pt)
+        
+        $footerRange.Text = "$footerLeft`tPagina "
+        $footerRange.Font.Name = "Calibri"
+        $footerRange.Font.Size = 8.5
+        
+        # Insertar campo dinámico de número de página de Word (wdFieldPage = 33)
+        $pRange = $footerRange.Duplicate
+        $pRange.Collapse(0) # wdCollapseEnd = 0
+        $wordDoc.Fields.Add($pRange, 33) | Out-Null
+        
+        # Añadir pestaña de tabulación derecha para cliente y consultora
+        $pRangeEnd = $footerRange.Duplicate
+        $pRangeEnd.Collapse(0)
+        $pRangeEnd.Text = "`t$footerRight"
+    }
+
+    # Formato 16 = wdFormatXMLDocument (.docx)
+    $fullOutputPath = [System.IO.Path]::GetFullPath($OutputFilePath)
+    $outputDir = [System.IO.Path]::GetDirectoryName($fullOutputPath)
+    $outputFileName = [System.IO.Path]::GetFileName($fullOutputPath)
+    
+    # Si ya existe un .docx anterior con el mismo nombre en la raíz, archivarlo en 99_Archive/
+    if (Test-Path -LiteralPath $fullOutputPath) {
+        $archiveDir = Join-Path $outputDir "99_Archive"
+        if (-not (Test-Path $archiveDir)) { New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null }
+        $archiveTarget = Join-Path $archiveDir $outputFileName
+        Move-Item -LiteralPath $fullOutputPath -Destination $archiveTarget -Force -ErrorAction SilentlyContinue
+    }
+
+    $wordDoc.SaveAs([ref]$fullOutputPath, [ref]16)
     $wordDoc.Close()
-    Write-Host "¡Documento Word ($OutputFilePath) generado con éxito!"
+    Write-Host "Documento Word ($OutputFilePath) generado con exito!"
 }
 catch {
     Write-Error "Fallo al convertir con Word: $_"
 }
 finally {
-    $word.Quit()
-    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($word) | Out-Null
+    if ($null -ne $wordDoc) { [System.Runtime.Interopservices.Marshal]::ReleaseComObject($wordDoc) | Out-Null }
+    if ($null -ne $word) {
+        $word.Quit()
+        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($word) | Out-Null
+    }
+    [GC]::Collect()
+    [GC]::WaitForPendingFinalizers()
     
     # Limpiar
-    if (Test-Path $tempHtml) { Remove-Item $tempHtml -Force }
+    if (Test-Path $tempHtml) { Remove-Item $tempHtml -Force -ErrorAction SilentlyContinue }
 }

@@ -25,7 +25,7 @@
 ---
 
 ## 1. Technical Objective & Scope
-[Describe the technical objective of this programming task. Reference the corresponding Functional Specification: `[ID]_02_FS_[Name]_vX.Y.md`.]
+[Describe the technical objective of this programming task. Reference the corresponding Functional Specification: `[ID]_03_FS_[Name]_vX.Y.md`.]
 
 - **Development Object:** [e.g. Class ZCL_SD_INVOICE_UTILS, BAdI Implementation, Report]
 - **Package:** [e.g. ZSD_INVOICE]

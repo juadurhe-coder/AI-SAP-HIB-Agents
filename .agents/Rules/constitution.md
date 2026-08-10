@@ -32,6 +32,11 @@ Una promesa verbal en el chat **tiene valor de cumplimiento cero**. Si el agente
 - **Creación secuencial obligatoria:** Al iniciar cualquier nueva propuesta o proyecto dentro de `Projects/`, el agente **TIENE PROHIBIDO** crear o modificar cualquier archivo de entregables (como propuestas o especificaciones) antes de haber inicializado, verificado y guardado el archivo `project_memory.md` en la raíz correspondiente.
 - **Acción Correctiva:** Ante cualquier petición de escritura en una ruta nueva, el agente realizará una verificación preliminar. Si no existe un `project_memory.md` activo o listo para validación, la acción de escritura de otros archivos se pausará automáticamente para dar prioridad a la memoria persistente.
 
+### 3.3 AUDITORÍA DE PLANTILLAS, METADATOS Y SCRIPTS POST-CREACIÓN (Self-Audit on Creation)
+- **Verificación de Entregables Obligatoria:** Tras crear o editar cualquier documento entregable (`.md` en `Projects/` con prefijos oficiales `01_` a `08_` según `document_types.json`), el agente DEBE ejecutar automáticamente `node .agents/scripts/check-governance.js` para asegurar que el documento cumple al 100% con la tabla de metadatos oficial (`Document Metadata`) y los saltos de página `[PAGE_BREAK]`.
+- **Verificación de Scripts:** Al crear o modificar scripts en `.agents/scripts/`, el agente DEBE ejecutar `powershell -ExecutionPolicy Bypass -File .agents\scripts\Test-ScriptIntegrity.ps1` para asegurar 0 errores de sintaxis AST y compatibilidad de código.
+- **Autocorregido Inmediato:** Está estrictamente **PROHIBIDO** solicitar revisión al usuario o intentar convertir a Word (`Convert-MdToDocx.ps1`) un entregable que carezca de metadatos o saltos de página. Si la auditoría detecta una falta, el agente debe corregir el archivo Markdown en el mismo turno antes de presentar el entregable.
+
 ## 4. PROTOCOLO DE COMUNICACIÓN HUMANO-AGENTE
 Todos los agentes del ecosistema DEBEN aplicar los protocolos definidos en `Skills/communication_protocols.md`:
 - Regla de Parada: Si falta >30% de información obligatoria, el agente se detiene y pregunta antes de avanzar. Nunca se genera un entregable completo con información insuficiente.

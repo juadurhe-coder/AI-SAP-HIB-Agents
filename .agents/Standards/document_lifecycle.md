@@ -26,20 +26,25 @@ Los documentos dentro de cada carpeta de proyecto deben seguir el estándar de p
 
 Donde:
 * **`[[IDTrazabilidad]]`**: Es el **número de ticket** (p. ej. `[76551]`, `[105295]`) o el **código de proyecto** (p. ej. `[PRJ-REB]`, `[PRJ-FRDD]`) entre corchetes. Si no se dispone de ticket o código de proyecto, se usará strictly el marcador con corchetes `[XXXXX]`.
-* **`[PrefijoNumérico]`**: Prefijo de fase `00_` a `06_`.
+* **`[PrefijoNumérico]`**: Prefijo numérico oficial de `00_` a `08_`.
 
 Cualquier cambio mayor incrementa la versión decimal (v1.1) y los hitos clave la versión entera (v2.0).
 
-### Tabla de Nomenclatura Estándar:
-| Prefijo | Tipo de Documento / Rol | Descripción / Hito SAP Activate | Ejemplo |
-| :---: | :--- | :--- | :--- |
-| **`00_`** | **Project Memory / Readme** | Fichero general de contexto y memoria del proyecto. | `[XXXXX]_00_Project_Memory.md` |
-| **`01_`** | **Proposal / Business Case** | Propuesta comercial, de valor o concepto inicial (Discover/Prepare). | `[76551]_01_Proposal_PriceReport_EN_v1.0.md` |
-| **`02_`** | **Functional Specification (FS)** | Especificación funcional del consultor funcional (Explore). | `[105295]_02_FS_PreventZeroQty_ES_v1.0.md` |
-| **`03_`** | **Technical Spec Backend (TS_BE)** | Especificación técnica backend para desarrollo ABAP/OData (Realize). | `[76551]_03_TS_Backend_PriceReport_EN_v1.0.md` |
-| **`04_`** | **Technical Spec Frontend (TS_FE)** | Especificación técnica frontend para Fiori/UI5 (Realize). | `[PRJ-REB]_04_TS_Frontend_RebateOData_v1.0.md` |
-| **`05_`** | **Test Script / QA** | Guía de pruebas unitarias, integradas y UAT (Verify). | `[PRJ-FRDD]_05_Test_Script_FlexibleDates_v1.0.md` |
-| **`06_`** | **Cutover & Deploy** | Tareas de traspaso a producción y checklist de Go-Live (Deploy). | `[PRJ-IC-DROP]_06_Cutover_DropShipment_v1.0.md` |
+### Fuente Única de Verdad (SSOT) - Catálogo de Nomenclatura
+El catálogo oficial completo de tipos de documentos, códigos de abreviatura (`PM`, `PR`, `BPD`, `FS`, `TS`, `UM`, `TC`, `CO`, `PP`) y mapeo a fases SAP Activate está centralizado de forma viva en:
+👉 [document_types.json](file:///c:/Users/JuanLuisDuranHernand/OneDrive%20-%20HIBERUS%20IT%20DEVELOPMENT%20SERVICES,%20S.L.U/.agents/Standards/document_types.json)
+
+| Código | Abreviatura | Tipo de Documento / Rol | Fase SAP Activate |
+| :---: | :---: | :--- | :---: |
+| **`00_`** | `PM` | Project Memory / Readme | Cierre / Run |
+| **`01_`** | `PR` | Proposal / Business Case / RFP | Discover |
+| **`02_`** | `BPD` | Business Process Document / Fit-to-Standard | Explore |
+| **`03_`** | `FS` | Functional Specification (FS) | Realize |
+| **`04_`** | `TS` | Technical Specification (TS - BE/FE) | Realize |
+| **`05_`** | `UM` | User Manual / Operating Guide | Realize / Deploy |
+| **`06_`** | `TC` | Test Cases / UAT / Test Scripts | Deploy |
+| **`07_`** | `CO` | Cutover & Go-Live Plan / Runbook | Deploy |
+| **`08_`** | `PP` | Project Plan / Roadmap / Planning | Transversal |
 
 ## 4. IDENTIFICACIÓN DE TRAZABILIDAD (TICKET Y CÓDIGO DE PROYECTO)
 Al iniciar la creación de cualquier propuesta o entregable, el agente **DEBE** solicitar el número de ticket (Jira, ServiceNow, etc.) o el código del proyecto (p. ej., `PRJ-REB`). Este ID es obligatorio para el nombrado de archivos y quedará registrado en el `[XXXXX]_00_Project_Memory.md`.
@@ -50,12 +55,12 @@ Si el nombre de la carpeta del proyecto está relacionado con un ticket específ
 
 ## 5. SISTEMA DE ARCHIVO Y VERSIONADO
 - Las versiones superadas, borradores iniciales o documentos rechazados deben moverse inmediatamente a una subcarpeta `99_Archive/` dentro de la carpeta del proyecto.
+- **Automatización de Archivado:** Se cuenta con el script automatizado [Archive-OutdatedVersions.ps1](file:///c:/Users/JuanLuisDuranHernand/OneDrive%20-%20HIBERUS%20IT%20DEVELOPMENT%20SERVICES,%20S.L.U/.agents/scripts/Archive-OutdatedVersions.ps1) que detecta automáticamente versiones obsoletas (ej. `v1.0` cuando existe `v1.1`), duplicados con `(1)`, `_OLD` / `_vOLD` y exportaciones temporales desfasadas, trasladándolos a `99_Archive/` y actualizando la trazabilidad en `00_Project_Memory.md`.
 - **Procedimiento Obligatorio:** Al archivar un archivo (ej. `..._v1.0.md`), el agente debe crear la nueva copia de trabajo incrementando la versión en el nombre del archivo (ej. `..._v1.1.md`) y en su cabecera. Se prohíbe reutilizar la misma versión para contenidos distintos.
-- **Excepción:** En refactorizaciones mayores o por solicitud del usuario, se permite mantener la versión previa en la raíz con el sufijo `_vOLD` temporalmente.
 - **Archivado de Kanban**: Para evitar el crecimiento indefinido de [Kanban.md](Kanban.md) y optimizar el consumo de tokens en lecturas recurrentes (ej: durante el daily), las tareas de la sección `DONE` que tengan más de 15 días de antigüedad desde su finalización serán trasladadas periódicamente por el agente a un archivo de histórico de tareas completadas en [Projects/99_Archive/Kanban_Archive.md](Projects/99_Archive/Kanban_Archive.md).
 
 ## 6. HIGIENE DE ARCHIVOS Y DUPLICADOS
-Se prohíbe la acumulación de archivos temporales, copias de seguridad automáticas (ej. `(1)`, `(2)`) o versiones duplicadas en las carpetas de trabajo. Si un agente detecta estos archivos, debe archivarlos (en `99_Archive/`) o eliminarlos de forma proactiva para evitar confusión.
+Se prohíbe la acumulación de archivos temporales, copias de seguridad automáticas (ej. `(1)`, `(2)`) o versiones duplicadas en las carpetas de trabajo. El agente o el linter ejecutarán `powershell -ExecutionPolicy Bypass -File .agents\scripts\Archive-OutdatedVersions.ps1` para mantener limpias las carpetas de proyectos.
 
 ## 7. REGLA DE MOCKUPS FIORI
 Solo se generará un mockup de UI y se incluirá la sección correspondiente en la propuesta si el requerimiento implica explícitamente una interfaz de usuario (Fiori/UI5). Para propuestas puramente de backend o configuración, se debe omitir esta sección y no generar archivos HTML de mockup.
@@ -121,3 +126,14 @@ Para evitar la pérdida de contexto y directrices de negocio críticas al inicia
 **Excepciones:** Este gate NO aplica cuando la acción es la creación de una carpeta de proyecto **nueva desde cero** (§1 ya cubre ese caso con la creación obligatoria inmediata del `00_Project_Memory.md`).
 
 **Violación = Fallo crítico.** Si el agente realiza cambios sobre un proyecto sin `00_Project_Memory.md` y sin haber ejecutado este gate, se considera un incumplimiento grave equivalente al GATE 0.
+
+---
+
+## 13. LINTER DE GOBERNANZA DE PROYECTOS (PROJECT GOVERNANCE LINTER)
+Para asegurar que los agentes y el equipo humano cumplen rigurosamente la nomenclatura y presencia de memorias persistentes, se cuenta con un script de linter estático:
+- **Ejecución CLI:** `node .agents/scripts/check-governance.js` o PowerShell `.agents/scripts/Test-GovernanceCompliance.ps1`.
+- **Reglas Auditadas:**
+  1. Presencia obligatoria de `00_Project_Memory.md` en la raíz de cada subcarpeta de `Projects/`.
+  2. Cumplimiento estricto de prefijos numéricos `00_` a `06_` en todos los archivos de entregables.
+  3. Detección de inconsistencias entre tipo de documento y prefijo (ej: FS marcado con `01_` en lugar de `02_`).
+

@@ -20,7 +20,7 @@ function Get-GitExecutable {
 }
 
 Write-Host "===============================================================" -ForegroundColor Cyan
-Write-Host " 🔄 SINCRONIZANDO CONFIGURACIÓN DE AGENTES DE HIBERUS         " -ForegroundColor Cyan
+Write-Host " SINCRONIZANDO CONFIGURACION DE AGENTES DE HIBERUS             " -ForegroundColor Cyan
 Write-Host "===============================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -29,12 +29,12 @@ $gitBin = Get-GitExecutable
 try {
     if ($gitBin) {
         # 1. Descargar cambios de Git
-        Write-Host "📥 Descargando últimas actualizaciones desde GitHub..." -ForegroundColor Yellow
+        Write-Host "Descargando ultimas actualizaciones desde GitHub..." -ForegroundColor Yellow
         $pullOutput = & $gitBin pull origin main 2>&1
         Write-Host $pullOutput -ForegroundColor Gray
         Write-Host ""
     } else {
-        Write-Host "⚠️ No se detectó Git instalado localmente. Omitiendo descarga de repositorio." -ForegroundColor Yellow
+        Write-Host "No se detecto Git instalado localmente. Omitiendo descarga de repositorio." -ForegroundColor Yellow
     }
 
     # 2. Sincronizar regla global local
@@ -50,13 +50,13 @@ try {
 
     if (Test-Path $workspaceAgentsMd) {
         Copy-Item -Path $workspaceAgentsMd -Destination $globalAgentsMd -Force
-        Write-Host "📋 Regla global AGENTS.md sincronizada en: $globalAgentsMd" -ForegroundColor Green
+        Write-Host "Regla global AGENTS.md sincronizada en: $globalAgentsMd" -ForegroundColor Green
     }
 
     Write-Host ""
     Write-Host "===============================================================" -ForegroundColor Cyan
-    Write-Host " 🎉 ¡ENTORNO ACTUALIZADO Y SINCRONIZADO CORRECTAMENTE!        " -ForegroundColor Green
+    Write-Host " ENTORNO ACTUALIZADO Y SINCRONIZADO CORRECTAMENTE!            " -ForegroundColor Green
     Write-Host "===============================================================" -ForegroundColor Cyan
 } catch {
-    Write-Error "Error durante la sincronización: $_"
+    Write-Error "Error durante la sincronizacion: $_"
 }
