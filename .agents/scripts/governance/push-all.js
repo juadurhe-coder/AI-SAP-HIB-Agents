@@ -61,52 +61,91 @@ const HEADERS = {
   'Accept': 'application/vnd.github.v3+json'
 };
 
-const CUTOFF_DATE = new Date('2020-01-01T00:00:00Z');
+const IGNORED_DIRS = new Set([
+  'node_modules',
+  '.git',
+  '.gemini',
+  '.system_generated',
+  'test_office_automation',
+  'browser_recordings',
+  'dist',
+  'build',
+  '.idea',
+  '.vscode'
+]);
 
-// DRY helper: encapsulates hostname + headers for all GitHub API calls
-function ghApi(apiPath, method = 'GET', body = null) {
-  return request({
-    hostname: 'api.github.com',
-    path: apiPath,
-    method,
-    headers: HEADERS
-  }, body);
+const IGNORED_EXTS = new Set([
+  '.mp4',
+  '.mov',
+  '.avi',
+  '.zip',
+  '.tar',
+  '.gz',
+  '.exe'
+]);
+
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB max per file for Git blobs
+
+// DRY helper: encapsulates hostname + headers with automatic retry on transient errors (500, 502, 503, 504)
+async function ghApi(apiPath, method = 'GET', body = null, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await request({
+        hostname: 'api.github.com',
+        path: apiPath,
+        method,
+        headers: HEADERS
+      }, body);
+    } catch (err) {
+      const isTransient = err.statusCode >= 500 && err.statusCode < 600;
+      if (isTransient && attempt < retries) {
+        const delayMs = attempt * 2000;
+        console.log(`   ⏳ Reintentando ${method} ${apiPath} (intento ${attempt + 1}/${retries}) tras ${delayMs}ms...`);
+        await new Promise(r => setTimeout(r, delayMs));
+      } else {
+        throw err;
+      }
+    }
+  }
 }
 
-function shouldIgnore(filePath) {
-  const norm = filePath.replace(/\\/g, '/').toLowerCase();
-  return norm.includes('/.git/') || 
-         norm.includes('/node_modules/') || 
-         norm.includes('/.gemini/') || 
-         norm.includes('/.system_generated/') || 
-         norm.includes('/test_office_automation/') || 
-         norm.includes('/browser_recordings/') || 
-         norm.includes('/dist/') || 
-         norm.includes('/build/');
+function shouldIgnore(fileName, stat) {
+  const lower = fileName.toLowerCase();
+  if (stat.isDirectory()) {
+    return IGNORED_DIRS.has(lower);
+  }
+  const ext = path.extname(lower);
+  if (IGNORED_EXTS.has(ext)) {
+    return true;
+  }
+  if (stat.size > MAX_FILE_SIZE_BYTES) {
+    console.log(`   ⚠️ Ignorando archivo superior a 25MB: ${fileName} (${Math.round(stat.size / 1024 / 1024)} MB)`);
+    return true;
+  }
+  return false;
 }
 
 function getWorkspaceFiles(dir, includeProjects = true, fileList = []) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     const fullPath = path.join(dir, file);
-    if (shouldIgnore(fullPath)) continue;
+    const stat = fs.statSync(fullPath);
+
+    if (shouldIgnore(file, stat)) continue;
 
     const relPath = path.relative(WORKSPACE_DIR, fullPath).replace(/\\/g, '/');
     if (!includeProjects && relPath.startsWith('Projects/')) {
       continue; // Excluir Projects/ para el repositorio de equipo
     }
 
-    const stat = fs.statSync(fullPath);
     if (stat.isDirectory()) {
       getWorkspaceFiles(fullPath, includeProjects, fileList);
     } else {
-      if (stat.mtime > CUTOFF_DATE) {
-        fileList.push({
-          fullPath,
-          relativePath: relPath,
-          size: stat.size
-        });
-      }
+      fileList.push({
+        fullPath,
+        relativePath: relPath,
+        size: stat.size
+      });
     }
   }
   return fileList;
@@ -171,19 +210,26 @@ async function pushToRepo(repoName, files, commitMessage) {
       type: 'blob',
       sha: blobData.sha
     });
+
+    if ((i + 1) % 50 === 0 || i === files.length - 1) {
+      console.log(`   📤 Subidos ${i + 1}/${files.length} blobs...`);
+    }
   }
 
+  console.log(`   🌳 Creando árbol de Git (Tree)...`);
   const newTreeData = await ghApi(`/repos/${OWNER}/${repoName}/git/trees`, 'POST', {
     base_tree: parentTreeSha,
     tree: treeEntries
   });
 
+  console.log(`   📝 Creando Commit...`);
   const newCommitData = await ghApi(`/repos/${OWNER}/${repoName}/git/commits`, 'POST', {
     message: commitMessage,
     tree: newTreeData.sha,
     parents: [latestCommitSha]
   });
 
+  console.log(`   📌 Actualizando rama '${BRANCH}'...`);
   await ghApi(`/repos/${OWNER}/${repoName}/git/refs/heads/${BRANCH}`, 'PATCH', {
     sha: newCommitData.sha,
     force: true
