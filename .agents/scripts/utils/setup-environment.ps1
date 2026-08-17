@@ -44,6 +44,30 @@ if (Test-Path $workspaceAgentsMd) {
     Write-Host "   -> Copiado exitosamente a: $globalAgentsMd" -ForegroundColor Green
 }
 
+# 3.1. Asegurar plantilla base de mcp_config.json si no existe
+$mcpConfigFile = Join-Path $geminiIdeDir "mcp_config.json"
+if (-not (Test-Path $mcpConfigFile)) {
+    Write-Host "Generando plantilla base mcp_config.json..." -ForegroundColor Gray
+    $mcpTemplate = @'
+{
+  "mcpServers": {
+    "github-mcp-server": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "AQUI_PEGA_TU_TOKEN_GHP"
+      }
+    }
+  }
+}
+'@
+    Set-Content -Path $mcpConfigFile -Value $mcpTemplate -Encoding UTF8
+    Write-Host "   -> Creado mcp_config.json listo para configurar tu token de GitHub" -ForegroundColor Green
+}
+
 # 4. Verificar presencia de componentes clave
 $components = @(
     @{ Name = "Orquestador Principal"; Path = ".agents\Agents\master_orchestrator.md" },
