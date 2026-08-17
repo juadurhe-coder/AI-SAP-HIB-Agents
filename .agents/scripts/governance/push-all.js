@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const crypto = require('crypto');
 
 // Configuration
 const OWNER = 'juadurhe-coder';
@@ -85,6 +86,12 @@ const IGNORED_EXTS = new Set([
 ]);
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB max per file for Git blobs
+
+// Compute Git Blob SHA-1 (identically to native git)
+function computeGitBlobSha(buffer) {
+  const header = `blob ${buffer.length}\0`;
+  return crypto.createHash('sha1').update(header).update(buffer).digest('hex');
+}
 
 // DRY helper: encapsulates hostname + headers with automatic retry on transient errors (500, 502, 503, 504)
 async function ghApi(apiPath, method = 'GET', body = null, retries = 3) {
@@ -174,7 +181,8 @@ async function ensureRepo(repoName, description) {
 }
 
 async function pushToRepo(repoName, files, commitMessage) {
-  console.log(`\n🚀 Publicando ${files.length} archivos en '${OWNER}/${repoName}'...`);
+  const startTime = Date.now();
+  console.log(`\n🚀 Analizando diferencias (Git Delta) en '${OWNER}/${repoName}' (${files.length} archivos locales)...`);
   
   let refData;
   try {
@@ -193,29 +201,66 @@ async function pushToRepo(repoName, files, commitMessage) {
   const commitData = await ghApi(`/repos/${OWNER}/${repoName}/git/commits/${latestCommitSha}`);
   const parentTreeSha = commitData.tree.sha;
 
+  // 1. Obtener el árbol remoto actual de GitHub
+  let remoteTreeMap = new Map();
+  try {
+    const remoteTreeData = await ghApi(`/repos/${OWNER}/${repoName}/git/trees/${parentTreeSha}?recursive=1`);
+    if (remoteTreeData && Array.isArray(remoteTreeData.tree)) {
+      remoteTreeData.tree.forEach(item => {
+        if (item.type === 'blob') {
+          remoteTreeMap.set(item.path, item.sha);
+        }
+      });
+    }
+  } catch (e) {
+    console.log(`   ⚠️ No se pudo obtener el árbol recursivo previo; se evaluará subida completa.`);
+  }
+
+  // 2. Comparar Hash local con Hash remoto (Diferencial)
   const treeEntries = [];
+  let uploadedCount = 0;
+  let reusedCount = 0;
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const fileBuffer = fs.readFileSync(file.fullPath);
-    const base64Content = fileBuffer.toString('base64');
+    const localSha = computeGitBlobSha(fileBuffer);
+    const remoteSha = remoteTreeMap.get(file.relativePath);
 
-    const blobData = await ghApi(`/repos/${OWNER}/${repoName}/git/blobs`, 'POST', {
-      content: base64Content,
-      encoding: 'base64'
-    });
+    let targetSha = remoteSha;
+    if (remoteSha && remoteSha === localSha) {
+      // El archivo es idéntico: reutilizamos el SHA sin hacer peticiones HTTP
+      reusedCount++;
+    } else {
+      // El archivo es nuevo o ha sido modificado: subimos el blob a GitHub
+      const base64Content = fileBuffer.toString('base64');
+      const blobData = await ghApi(`/repos/${OWNER}/${repoName}/git/blobs`, 'POST', {
+        content: base64Content,
+        encoding: 'base64'
+      });
+      targetSha = blobData.sha;
+      uploadedCount++;
+      console.log(`   📤 [MODIFICADO/NUEVO] ${file.relativePath}`);
+    }
 
     treeEntries.push({
       path: file.relativePath,
       mode: '100644',
       type: 'blob',
-      sha: blobData.sha
+      sha: targetSha
     });
-
-    if ((i + 1) % 50 === 0 || i === files.length - 1) {
-      console.log(`   📤 Subidos ${i + 1}/${files.length} blobs...`);
-    }
   }
 
+  // 3. Comprobar si hubo cambios reales
+  if (uploadedCount === 0 && treeEntries.length === remoteTreeMap.size) {
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`⚡ Repositorio '${OWNER}/${repoName}' ya está 100% al día (${reusedCount} archivos verificados en ${elapsed}s, 0 cambios detectados).`);
+    return;
+  }
+
+  console.log(`   📊 Resumen Delta: ${uploadedCount} subido(s), ${reusedCount} sin cambios.`);
+
+  // 4. Construcción incremental del árbol
   console.log(`   🌳 Creando árbol de Git de forma incremental...`);
   const BATCH_SIZE = 80;
   let currentBaseTreeSha = parentTreeSha;
@@ -227,9 +272,9 @@ async function pushToRepo(repoName, files, commitMessage) {
       tree: chunk
     });
     currentBaseTreeSha = chunkTreeData.sha;
-    console.log(`   🌳 Árbol incremental actualizado (${Math.min(b + BATCH_SIZE, treeEntries.length)}/${treeEntries.length} entradas)...`);
   }
 
+  // 5. Crear Commit y actualizar rama
   console.log(`   📝 Creando Commit...`);
   const newCommitData = await ghApi(`/repos/${OWNER}/${repoName}/git/commits`, 'POST', {
     message: commitMessage,
@@ -243,7 +288,8 @@ async function pushToRepo(repoName, files, commitMessage) {
     force: true
   });
 
-  console.log(`✅ Repositorio '${OWNER}/${repoName}' actualizado correctamente.`);
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`✅ Repositorio '${OWNER}/${repoName}' sincronizado exitosamente en ${elapsed}s.`);
 }
 
 async function run() {
@@ -258,13 +304,25 @@ async function run() {
   console.log(`🔒 Archivos para el Repositorio Privado ('${PRIVATE_REPO}'): ${privateFiles.length}`);
 
   try {
-    // Publicar en el Repositorio de Equipo
-    await ensureRepo(TEAM_REPO, 'Suite de Agentes, Reglas, Workflows y Estándares de HIBERUS (Read-Only para Equipo)');
-    await pushToRepo(TEAM_REPO, teamFiles, 'Update team framework: .agents profiles and onboarding assets');
+    const reposToSync = [
+      {
+        name: TEAM_REPO,
+        files: teamFiles,
+        description: 'Suite de Agentes, Reglas, Workflows y Estándares de HIBERUS (Read-Only para Equipo)',
+        message: 'Update team framework: .agents profiles and onboarding assets'
+      },
+      {
+        name: PRIVATE_REPO,
+        files: privateFiles,
+        description: 'Respaldo Privado Completo de Proyectos SAP y Agentes HIBERUS',
+        message: 'Update private full workspace: .agents and Projects'
+      }
+    ];
 
-    // Publicar en el Repositorio Privado Personal
-    await ensureRepo(PRIVATE_REPO, 'Respaldo Privado Completo de Proyectos SAP y Agentes HIBERUS');
-    await pushToRepo(PRIVATE_REPO, privateFiles, 'Update private full workspace: .agents and Projects');
+    for (const target of reposToSync) {
+      await ensureRepo(target.name, target.description);
+      await pushToRepo(target.name, target.files, target.message);
+    }
 
     console.log('\n🎉 ¡PROCESO FINALIZADO CON ÉXITO!');
     console.log(`- Repo Equipo (Limpio sin Projects): https://github.com/${OWNER}/${TEAM_REPO}`);
