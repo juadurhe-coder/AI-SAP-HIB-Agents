@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "description": "Catálogo unificado y Fuente Única de Verdad (SSOT) para tipos de documentos y nomenclatura en el ecosistema SAP PMO, alineado con las fases de SAP Activate.",
   "types": [
     {
@@ -28,6 +28,15 @@
       "description": "Documento de proceso de negocio, talleres Fit-to-Standard y mapas de procesos.",
       "template": "bpd_template.md",
       "keywords": ["bpd", "fit_to_standard", "process", "proceso"]
+    },
+    {
+      "prefix": "02_",
+      "code": "MK",
+      "name": "UI Mockup / Fiori HTML Prototype",
+      "phase": "Explore / Design",
+      "description": "Prototipo interactivo HTML/Fiori de interfaz de usuario para validación con el cliente.",
+      "template": "fiori_mockup_template.html",
+      "keywords": ["mk", "mockup", "html", "fiori_mockup", "ui"]
     },
     {
       "prefix": "03_",
@@ -83,5 +92,12 @@
       "template": "project_plan_template.md",
       "keywords": ["pp", "project_plan", "roadmap", "planificacion", "plan"]
     }
+  ],
+  "initiative_prefixes": [
+    { "type": "Proyecto", "prefix": "PRJ-", "name": "Project / Proyecto", "example": "PRJ-IC-DROP" },
+    { "type": "Change Request", "prefix": "CR-", "name": "Change Request / Cambio / Mejora", "example": "CR-104868" },
+    { "type": "Service Request", "prefix": "SR-", "name": "Service Request / Solicitud de Servicio", "example": "SR-88421" },
+    { "type": "Demand", "prefix": "DEM-", "name": "Demand / Demanda de Negocio", "example": "DEM-104868" },
+    { "type": "Incident", "prefix": "INC-", "name": "Incident / Incidencia / Bug", "example": "INC-103563" }
   ]
 }

@@ -1,0 +1,11 @@
+<mvc:View
+    controllerName="com.legacy.app.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page id="mainPage" title="Gestión de Pedidos Legacy">
+        <content>
+            <Button text="Guardar Cambios" tooltip="Haz click aquí para guardar" />
+            <Input placeholder="Introduce tu nombre" />
+        </content>
+    </Page>
+</mvc:View>

@@ -23,7 +23,7 @@ Slide content
 2. Ejecuta el script de exportación:
 // turbo
 ```powershell
-& ".\.agents\scripts\Convert-MdToPptx.ps1" -InputFilePath "<RUTA_ABSOLUTA_DEL_ARCHIVO_MD>" -OutputFilePath "<RUTA_ABSOLUTA_DEL_RESULTADO_PPTX>"
+& ".\.agents\scripts\converters\Convert-MdToPptx.ps1" -InputFilePath "<RUTA_ABSOLUTA_DEL_ARCHIVO_MD>" -OutputFilePath "<RUTA_ABSOLUTA_DEL_RESULTADO_PPTX>"
 ```
 
 3. Notifica al usuario que la presentación ha sido creada y se encuentra lista.

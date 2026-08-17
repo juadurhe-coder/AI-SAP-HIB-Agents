@@ -1,0 +1,75 @@
+{
+  "namingConventions": {
+    "importingParameter": "^IV_[A-Z0-9_]+$",
+    "exportingParameter": "^EV_[A-Z0-9_]+$",
+    "changingParameter": "^CV_[A-Z0-9_]+$",
+    "returningParameter": "^RV_[A-Z0-9_]+$",
+    "localTable": "^LT_[A-Z0-9_]+$",
+    "globalTable": "^GT_[A-Z0-9_]+$",
+    "localStructure": "^LS_[A-Z0-9_]+$",
+    "globalStructure": "^GS_[A-Z0-9_]+$",
+    "localObject": "^LO_[A-Z0-9_]+$",
+    "globalObject": "^GO_[A-Z0-9_]+$",
+    "fieldSymbol": "^<FS_[A-Z0-9_]+>$",
+    "constant": "^C_[A-Z0-9_]+$",
+    "cdsInterfaceView": "^ZI_[A-Za-z0-9_]+$",
+    "cdsConsumptionView": "^ZC_[A-Za-z0-9_]+$",
+    "serviceDefinition": "^ZSRV_[A-Za-z0-9_]+$",
+    "serviceBinding": "^ZSRVB_[A-Za-z0-9_]+$",
+    "minIdentifierLength": 4
+  },
+  "metrics": {
+    "maxMethodLines": 30,
+    "maxMethodParameters": 5,
+    "maxNestingDepth": 3
+  },
+  "redundantCommentPhrases": [
+    "declaracion de variables",
+    "declaración de variables",
+    "variables locales",
+    "incremento contador",
+    "fin de bucle",
+    "fin de si",
+    "call method",
+    "select data"
+  ],
+  "prohibitedKeywordsInCloud": [
+    "CALL FUNCTION DESTINATION",
+    "OPEN DATASET",
+    "TRANSFER",
+    "CLOSE DATASET",
+    "SUBMIT",
+    "LEAVE TO TRANSACTION",
+    "CALL TRANSACTION",
+    "TABLES",
+    "RANGES"
+  ],
+  "requiredCdsAnnotations": [
+    "@AccessControl.authorizationCheck",
+    "@EndUserText.label"
+  ],
+  "recommendedCdsAnnotations": [
+    "@ObjectModel.usageType",
+    "@Metadata.allowExtensions"
+  ],
+  "securityPatterns": {
+    "prohibitedStatements": [
+      "INSERT REPORT",
+      "GENERATE SUBROUTINE POOL",
+      "DELETE REPORT",
+      "SYNTAX-CHECK FOR PROGRAM"
+    ],
+    "sensitiveCredentialKeywords": [
+      "password",
+      "passwd",
+      "secret_key",
+      "api_key",
+      "bearer_token",
+      "private_key"
+    ]
+  },
+  "performancePatterns": {
+    "prohibitedSelectAll": "SELECT\\s+\\*\\s+FROM",
+    "prohibitedSelectInLoop": "SELECT\\s+(?:SINGLE\\s+|COUNT\\s*\\(|\\*|[A-Za-z0-9_,\\s]+)\\s+FROM"
+  }
+}

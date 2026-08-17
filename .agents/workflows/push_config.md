@@ -9,7 +9,7 @@ Este workflow se utiliza cuando el usuario o el agente finalizan un trabajo, apr
 1. Ejecuta el script de publicación a GitHub:
 // turbo
 ```powershell
-node .\.agents\scripts\push-all.js
+node .\.agents\scripts\governance\push-all.js
 ```
 
 2. Notifica al usuario que el repositorio `AI-HIBERUS-Projects` ha sido actualizado exitosamente en GitHub.

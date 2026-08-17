@@ -39,6 +39,7 @@ El catálogo oficial completo de tipos de documentos, códigos de abreviatura (`
 | **`00_`** | `PM` | Project Memory / Readme | Cierre / Run |
 | **`01_`** | `PR` | Proposal / Business Case / RFP | Discover |
 | **`02_`** | `BPD` | Business Process Document / Fit-to-Standard | Explore |
+| **`02_`** | `MK` | UI Mockup / Fiori HTML Prototype | Explore / Design |
 | **`03_`** | `FS` | Functional Specification (FS) | Realize |
 | **`04_`** | `TS` | Technical Specification (TS - BE/FE) | Realize |
 | **`05_`** | `UM` | User Manual / Operating Guide | Realize / Deploy |
@@ -62,8 +63,10 @@ Si el nombre de la carpeta del proyecto está relacionado con un ticket específ
 ## 6. HIGIENE DE ARCHIVOS Y DUPLICADOS
 Se prohíbe la acumulación de archivos temporales, copias de seguridad automáticas (ej. `(1)`, `(2)`) o versiones duplicadas en las carpetas de trabajo. El agente o el linter ejecutarán `powershell -ExecutionPolicy Bypass -File .agents\scripts\Archive-OutdatedVersions.ps1` para mantener limpias las carpetas de proyectos.
 
-## 7. REGLA DE MOCKUPS FIORI
-Solo se generará un mockup de UI y se incluirá la sección correspondiente en la propuesta si el requerimiento implica explícitamente una interfaz de usuario (Fiori/UI5). Para propuestas puramente de backend o configuración, se debe omitir esta sección y no generar archivos HTML de mockup.
+## 7. REGLA DE MOCKUPS FIORI (HTML PROTOTYPES - MK)
+- **Generación Condicionada:** Solo se generará un mockup de UI y se incluirá la sección correspondiente en la propuesta si el requerimiento implica explícitamente una interfaz de usuario (Fiori/UI5). Para propuestas puramente de backend o configuración, se debe omitir esta sección y no generar archivos HTML de mockup.
+- **Nomenclatura Estándar Obligatoria:** Todo prototipo HTML debe seguir el código de tipo `MK` y nombrarse estrictamente como:  
+  `[[IDTrazabilidad]]_02_MK_Mockup_[NombreModulo_Opcion].html` (ej: `[PRJ-REB]_02_MK_Mockup_Rebate_Monitor.html`).
 
 ## 8. TRAZABILIDAD DE CAMBIOS ESTRUCTURALES
 Cualquier cambio estructural o creación de carpetas debe ser comunicado explícitamente al usuario.
@@ -136,4 +139,26 @@ Para asegurar que los agentes y el equipo humano cumplen rigurosamente la nomenc
   1. Presencia obligatoria de `00_Project_Memory.md` en la raíz de cada subcarpeta de `Projects/`.
   2. Cumplimiento estricto de prefijos numéricos `00_` a `06_` en todos los archivos de entregables.
   3. Detección de inconsistencias entre tipo de documento y prefijo (ej: FS marcado con `01_` en lugar de `02_`).
+
+---
+
+## 15. GESTIÓN DE METADATOS Y TIPOS DE INICIATIVAS (`.project_metadata.json`)
+Para evitar la re-introducción manual de metadatos en cada documento y estandarizar la cabecera:
+1. **Archivo de Metadatos Persistentes (`.project_metadata.json`):** Cada subcarpeta dentro de `Projects/` (ya sea Proyecto, Incidencia o Cambio/Mejora) DEBE contar con un archivo `.project_metadata.json` en su raíz.
+2. **Campos Estándar Obligatorios:**
+   - `client`: Nombre del Cliente (ej: `Oetiker`, `Hiberus`).
+   - `initiative_type`: Tipo de iniciativa (`Proyecto`, `Incidencia / Bug`, `Cambio / Mejora`).
+   - `sap_module`: Módulo(s) SAP implicado(s) (ej: `SD / MM / FI`).
+   - `sap_environment`: Entorno SAP objetivo (ej: `S/4HANA 2022 OP`, `Public Cloud`).
+   - `author`: Autor o equipo (ej: `Hiberus SAP Consulting`).
+   - `project_id`: ID de Trazabilidad normalizado (ej: `PRJ-IC-DROP` para Proyectos, `CR-104868`, `INC-103563`).
+   - `project_name`: Nombre completo descriptivo de la iniciativa o proyecto (ej: `Advanced Intercompany Drop Shipment`).
+   - `ticket_number`: (Opcional para Change Requests / Service Requests / Demands / Incidencias; **omitido en Proyectos**). Número de ticket externo de Jira / ServiceNow / ITSM (ej: `76551`, `104868`).
+3. **Eliminación de `Confidentiality`:** El campo `Confidentiality` queda **estrictamente eliminado** de todas las plantillas y cabeceras de metadatos. La tabla de cabecera estándar para entregables `.md` será:
+   `[Cliente | Tipo de Iniciativa | Módulo SAP | Entorno SAP | Autor | Fecha]`
+4. **Auto-prompting al Inicializar:** Si el agente va a crear o modificar un entregable en una carpeta que NO posea `.project_metadata.json`, **DEBE preguntar los datos al usuario 1 sola vez** y generar el archivo `.project_metadata.json` automáticamente en el directorio correspondiente antes de continuar.
+5. **Sincronización Automática de Nombres de Archivo (`Sync-ProjectId.ps1`):** Al modificar el campo `project_id` en `.project_metadata.json`, se ejecutará el script [`Sync-ProjectId.ps1`](file:///c:/Users/JuanLuisDuranHernand/OneDrive%20-%20HIBERUS%20IT%20DEVELOPMENT%20SERVICES,%20S.L.U/Documentos/Proyectos/AI/.agents/scripts/Sync-ProjectId.ps1) para renombrar automáticamente el prefijo `[[IDTrazabilidad]]` de todos los archivos físicos de la carpeta y actualizar de forma transparente sus enlaces/referencias cruzadas dentro de los ficheros Markdown (`.md`).
+
+
+
 

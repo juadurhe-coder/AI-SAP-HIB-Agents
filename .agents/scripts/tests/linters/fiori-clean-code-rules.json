@@ -1,0 +1,71 @@
+{
+  "prohibitedDomPatterns": [
+    "document.getElementById",
+    "document.getElementsByClassName",
+    "document.querySelector",
+    "document.querySelectorAll",
+    "$(",
+    "jQuery("
+  ],
+  "prohibitedObsoleteApis": [
+    "jQuery.sap.require",
+    "jQuery.sap.declare",
+    "sap.ui.getCore().getElementById",
+    "sap.ui.getCore().byUI5Id"
+  ],
+  "prohibitedSyncPatterns": [
+    "async:\\s*false",
+    "new\\s+XMLHttpRequest\\(\\)",
+    "jQuery\\.ajax\\(\\{.*async:\\s*false",
+    "\\.loadData\\([^)]*,\\s*[^,)]*,\\s*false\\s*\\)"
+  ],
+  "invalidXmlControls": {
+    "sap.m": [
+      "Badge",
+      "Card",
+      "Header",
+      "Item"
+    ]
+  },
+  "requiredXmlAttributesI18n": [
+    "text",
+    "title",
+    "label",
+    "tooltip",
+    "placeholder",
+    "headerText",
+    "description",
+    "noDataText"
+  ],
+  "htmlBootstrapRules": {
+    "disallowedInlineAttachInit": true,
+    "requireOnInitModule": true,
+    "requireDevPreloadOff": true,
+    "requireAsyncPreload": true
+  },
+  "componentJsRules": {
+    "requiredBaseClass": "sap/ui/core/UIComponent",
+    "requireManifestMetadata": true,
+    "requireSuperInit": true
+  },
+  "initJsRules": {
+    "requireComponentCreateAsync": true
+  },
+  "manifestRequiredFields": [
+    "sap.app.id",
+    "sap.app.type",
+    "sap.app.i18n",
+    "sap.ui5.dependencies",
+    "sap.ui5.models"
+  ],
+  "recommendedODataVersion": "4.0",
+  "recommendedDependencies": {
+    "@ui5/cli": "^4.0.0",
+    "@sap/ux-ui5-tooling": "^1.30.0",
+    "@sap-ux/ui5-middleware-fe-mockserver": "^2.0.0"
+  },
+  "minimumPackageVersions": {
+    "@ui5/cli": "4.0.0",
+    "@sap/ux-ui5-tooling": "1.30.0"
+  }
+}

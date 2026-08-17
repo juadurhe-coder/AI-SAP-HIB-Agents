@@ -28,8 +28,9 @@ Develop robust, scalable, and "Clean Core" compliant backend services alongside 
 - **Tool Mandate — Verificación de APIs:**
   - SIEMPRE usar `abap-mcp-hosted:sap_search_objects` y `abap-mcp-hosted:sap_get_object_details` para verificar que las APIs/clases/tablas sean Released (Clean Core Level A) antes de usarlas.
   - Si un objeto no es nivel A, buscar su sucesor vía el campo `successor`.
-- **Tool Mandate — Validación de Código:**
+- **Tool Mandate — Validación de Código & Clean Code Suite:**
   - SIEMPRE ejecutar `abap-mcp-hosted:abap_lint` sobre el código generado para validar sintaxis y best practices.
+  - SIEMPRE validar el código generado con los scripts de gobierno `.agents/scripts/check-abap-clean-code-quality.js`, `check-abap-clean-code-refactoring.js` y `check-abap-robustness-nulls.js`.
 - **Tool Mandate — Documentación:**
   - Usar `abap-mcp-hosted:search` para consultar documentación oficial de statements o features ABAP.
 - Usar `cds-mcp:search_model` para verificar modelos CDS en proyectos CAP.
@@ -39,11 +40,17 @@ Develop robust, scalable, and "Clean Core" compliant backend services alongside 
 - Consultar `Skills/fiori_design.md` antes de iniciar cualquier tarea de UI. Usar el árbol de decisión de floorplans.
 - **Tool Mandate — Directrices UI:**
   - SIEMPRE ejecutar `sap-ui5:get_guidelines` al inicio de cada tarea UI para cargar las directrices oficiales.
+  - SIEMPRE validar la app Fiori con `.agents/scripts/checkers/fiori/check-fiori-clean-code-quality.js` y `.agents/scripts/checkers/fiori/check-fiori-spec-governance.js`.
 - **Tool Mandate — API Reference UI:**
   - SIEMPRE usar `sap-ui5:get_api_reference` al referenciar controles de SAPUI5.
-- **Tool Mandate — Linting UI:**
+- **Tool Mandate — Linting & Dependencias UI:**
   - SIEMPRE ejecutar `sap-ui5:run_ui5_linter` tras escribir/modificar código UI5.
   - SIEMPRE ejecutar `sap-ui5:run_manifest_validation` tras modificar `manifest.json`.
+  - SIEMPRE validar la app Fiori y sus dependencias (`package.json`, `index.html`, `views`, `manifest.json`) con `.agents/scripts/checkers/fiori/check-fiori-clean-code-quality.js`, garantizando:
+    1. `@ui5/cli` `^4.0.0+` y `@sap/ux-ui5-tooling` `^1.30.0+`.
+    2. Bootstrap 100% asíncrono con `data-sap-ui-oninit="module:.../init"`, `data-sap-ui-preload="async"` y `Component.create({ manifest: true, async: true })` en `init.js`.
+    3. `manifest.json` con `"settings": { "async": true }` en el modelo `i18n`.
+    4. Layouts semánticos (`layout:Grid`, `VBox` con `<Title level="H6">` o `<Text>`) para campos informativos o KPIs de solo lectura, evitando `<Label>` huérfanos de formularios.
 - Priorizar Fiori Elements estándar sobre código custom. Justificar explícitamente cualquier uso de Freestyle.
 - Proporcionar mock data (`localService/`) junto con toda app generada.
 

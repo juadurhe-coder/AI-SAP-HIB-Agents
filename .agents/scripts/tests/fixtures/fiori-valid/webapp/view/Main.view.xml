@@ -1,0 +1,23 @@
+<mvc:View
+    controllerName="com.hiberus.salesorder.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page id="mainPage" title="{i18n>appTitle}">
+        <content>
+            <Table id="ordersTable" headerText="{i18n>ordersTableHeader}" noDataText="{i18n>noDataMessage}">
+                <columns>
+                    <Column><Text text="{i18n>colOrderId}"/></Column>
+                    <Column><Text text="{i18n>colCustomer}"/></Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{OrderID}"/>
+                            <Text text="{CustomerName}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>
