@@ -38,11 +38,13 @@ Develop robust, scalable, and "Clean Core" compliant backend services alongside 
 
 ### 3. Normativa Técnica Frontend (Fiori UI5 & UI Annotations)
 - Consultar `Skills/fiori_design.md` antes de iniciar cualquier tarea de UI. Usar el árbol de decisión de floorplans.
+- En actualizaciones/migraciones de versiones UI5, aplicar obligatoriamente `Skills/ui5_version_upgrade/SKILL.md`.
 - **Tool Mandate — Directrices UI:**
   - SIEMPRE ejecutar `sap-ui5:get_guidelines` al inicio de cada tarea UI para cargar las directrices oficiales.
   - SIEMPRE validar la app Fiori con `.agents/scripts/checkers/fiori/check-fiori-clean-code-quality.js` y `.agents/scripts/checkers/fiori/check-fiori-spec-governance.js`.
 - **Tool Mandate — API Reference UI:**
   - SIEMPRE usar `sap-ui5:get_api_reference` al referenciar controles de SAPUI5.
+  - Usar `sap-docs-hosted:ui5_version_diff` para auditar diferencias de API y *What's New* entre versiones de SAPUI5.
 - **Tool Mandate — Linting & Dependencias UI:**
   - SIEMPRE ejecutar `sap-ui5:run_ui5_linter` tras escribir/modificar código UI5.
   - SIEMPRE ejecutar `sap-ui5:run_manifest_validation` tras modificar `manifest.json`.
@@ -54,7 +56,20 @@ Develop robust, scalable, and "Clean Core" compliant backend services alongside 
 - Priorizar Fiori Elements estándar sobre código custom. Justificar explícitamente cualquier uso de Freestyle.
 - Proporcionar mock data (`localService/`) junto con toda app generada.
 
-### 4. Eficiencia MCP (Obligatorio)
+### 4. Matriz de Selección de Herramientas MCP SAP & Eficiencia
+Seleccionar la herramienta especializada según la necesidad de desarrollo:
+
+| Tipo de Necesidad / Consulta | Servidor & Herramienta Recomendada | Propósito / Ejemplo |
+| :--- | :--- | :--- |
+| **Sintaxis ABAP Standard / Cloud** | `abap-mcp-hosted:search` | Consultar keywords (ej. `search: "inline declarations cloud"`). |
+| **Verificación Clean Core (Released API)** | `abap-mcp-hosted:sap_search_objects` | Validar clases/CDS nivel A (`sap_get_object_details`). |
+| **Documentación Controles UI5 / CAP** | `sap-docs-hosted:search` | Propiedades, eventos y patrones UI5 (`search: "Table sticky header"`). |
+| **Comunidad SAP & Foros de Errores** | `sap-docs-hosted:sap_community_search` | Resolución de bugs reales y blogs técnicos. |
+| **Diferencias / Migración de Versiones UI5** | `sap-docs-hosted:ui5_version_diff` | APIs deprecadas y What's New entre dos versiones de SAPUI5. |
+| **Directrices & API Oficial UI5** | `sap-ui5:get_guidelines` / `get_api_reference` | Estándares de desarrollo y especificación de controles. |
+| **Auditoría Linter & Manifest UI5** | `sap-ui5:run_ui5_linter` / `run_manifest_validation` | Análisis estático y validación de descriptores. |
+
+**Reglas de Eficiencia:**
 - Usar `limit=10` en `sap_search_objects` y `k=10` en `search`.
 - Usar `includeSamples=false` en verificaciones de APIs o sintaxis.
 - No ejecutar `fetch` si el snippet ya contiene la respuesta requerida.
