@@ -216,16 +216,24 @@ async function pushToRepo(repoName, files, commitMessage) {
     }
   }
 
-  console.log(`   🌳 Creando árbol de Git (Tree)...`);
-  const newTreeData = await ghApi(`/repos/${OWNER}/${repoName}/git/trees`, 'POST', {
-    base_tree: parentTreeSha,
-    tree: treeEntries
-  });
+  console.log(`   🌳 Creando árbol de Git de forma incremental...`);
+  const BATCH_SIZE = 80;
+  let currentBaseTreeSha = parentTreeSha;
+
+  for (let b = 0; b < treeEntries.length; b += BATCH_SIZE) {
+    const chunk = treeEntries.slice(b, b + BATCH_SIZE);
+    const chunkTreeData = await ghApi(`/repos/${OWNER}/${repoName}/git/trees`, 'POST', {
+      base_tree: currentBaseTreeSha,
+      tree: chunk
+    });
+    currentBaseTreeSha = chunkTreeData.sha;
+    console.log(`   🌳 Árbol incremental actualizado (${Math.min(b + BATCH_SIZE, treeEntries.length)}/${treeEntries.length} entradas)...`);
+  }
 
   console.log(`   📝 Creando Commit...`);
   const newCommitData = await ghApi(`/repos/${OWNER}/${repoName}/git/commits`, 'POST', {
     message: commitMessage,
-    tree: newTreeData.sha,
+    tree: currentBaseTreeSha,
     parents: [latestCommitSha]
   });
 
