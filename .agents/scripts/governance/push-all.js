@@ -252,7 +252,7 @@ async function pushToRepo(repoName, files, commitMessage) {
   }
 
   // 3. Comprobar si hubo cambios reales
-  if (uploadedCount === 0 && treeEntries.length === remoteTreeMap.size) {
+  if (uploadedCount === 0) {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(`⚡ Repositorio '${OWNER}/${repoName}' ya está 100% al día (${reusedCount} archivos verificados en ${elapsed}s, 0 cambios detectados).`);
     return;
