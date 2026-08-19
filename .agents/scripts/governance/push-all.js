@@ -198,12 +198,13 @@ function getWorkspaceFiles(dir, targetMode = 'team_only', fileList = []) {
     if (shouldIgnore(file, stat)) continue;
 
     const relPath = path.relative(WORKSPACE_DIR, fullPath).replace(/\\/g, '/');
+    const isProjectsPath = relPath === 'Projects' || relPath.startsWith('Projects/');
 
-    if (targetMode === 'team_only' && relPath.startsWith('Projects/')) {
+    if (targetMode === 'team_only' && isProjectsPath) {
       continue; // Excluir Projects/ para el repositorio de equipo
     }
 
-    if (targetMode === 'projects_only' && !relPath.startsWith('Projects/')) {
+    if (targetMode === 'projects_only' && !isProjectsPath) {
       continue; // Excluir .agents/ y framework para el repositorio exclusivo de proyectos
     }
 
