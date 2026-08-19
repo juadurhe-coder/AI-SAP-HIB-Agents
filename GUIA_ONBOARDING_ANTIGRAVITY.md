@@ -60,23 +60,23 @@ Tienes 2 opciones para descargar el proyecto. Elige la que te resulte más cómo
 1. Abre el buscador de Windows (la lupa al lado del botón Inicio) y escribe `cmd` o `Terminal`. Abre la aplicación **Símbolo del sistema**.
 2. Escribe el siguiente comando y pulsa **Enter**:
    ```bash
-   git clone https://github.com/juadurhe-coder/AI-HIBERUS-Projects.git
+   git clone https://github.com/juadurhe-coder/AI-SAP-HIB-Agents.git
    ```
-3. Se creará automáticamente una carpeta llamada `AI-HIBERUS-Projects` en tu equipo.
+3. Se creará automáticamente una carpeta llamada `AI-SAP-HIB-Agents` en tu equipo.
 
 ---
 
 ### OPCIÓN B (Ultra Fácil sin Consola):
-1. Entra en el enlace del repositorio: 👉 [https://github.com/juadurhe-coder/AI-HIBERUS-Projects](https://github.com/juadurhe-coder/AI-HIBERUS-Projects)
+1. Entra en el enlace del repositorio: 👉 [https://github.com/juadurhe-coder/AI-SAP-HIB-Agents](https://github.com/juadurhe-coder/AI-SAP-HIB-Agents)
 2. En la parte superior derecha de la pantalla, haz clic en el botón verde que dice **`<> Code`**.
 3. En el menú desplegable, haz clic en **Download ZIP**.
-4. Se descargará un archivo `.zip`. Descomprímelo en tu ordenador (por ejemplo, en `Documentos\Proyectos\AI-HIBERUS-Projects`).
+4. Se descargará un archivo `.zip`. Descomprímelo en tu ordenador (por ejemplo, en `Documentos\Proyectos\AI-SAP-HIB-Agents`).
 
 ---
 
 ## 📌 PASO 4: Puesta a Punto en 1 Solo Clic (`setup.bat`)
 
-Una vez tengas la carpeta `AI-HIBERUS-Projects` en tu equipo:
+Una vez tengas la carpeta `AI-SAP-HIB-Agents` en tu equipo:
 
 1. Abre el **Explorador de Archivos de Windows** y entra en la carpeta del proyecto.
 2. Busca un archivo llamado **`setup.bat`** (o `setup`).
@@ -140,7 +140,7 @@ Para que el sistema pueda consultar actualizaciones del equipo automáticamente 
 1. Abre la aplicación **Antigravity IDE** en tu ordenador.
 2. Inicia sesión con tu cuenta de Google.
 3. En el menú superior de la aplicación, haz clic en **File** (Archivo) > **Open Folder** (Abrir Carpeta).
-4. Selecciona la carpeta `AI-HIBERUS-Projects` de tu ordenador y haz clic en **Seleccionar carpeta**.
+4. Selecciona la carpeta `AI-SAP-HIB-Agents` de tu ordenador y haz clic en **Seleccionar carpeta**.
 
 ¡Listo! Antigravity detectará automáticamente los 5 roles de agentes inteligentes de HIBERUS.
 
