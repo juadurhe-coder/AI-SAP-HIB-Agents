@@ -116,6 +116,62 @@ async function ghApi(apiPath, method = 'GET', body = null, retries = 3) {
   }
 }
 
+// Secret Scanner: Checks for hardcoded tokens, passwords, and private keys before pushing
+const SECRET_PATTERNS = [
+  { name: 'GitHub Personal Access Token (classic)', regex: /ghp_[a-zA-Z0-9]{36}/ },
+  { name: 'GitHub Fine-grained PAT', regex: /github_pat_[a-zA-Z0-9_]{50,100}/ },
+  { name: 'Generic Bearer Token in code', regex: /Bearer\s+["']?[a-zA-Z0-9_\-\.]{30,}["']?/ },
+  { name: 'Private Key block', regex: /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/ },
+  { name: 'Supabase Service Role Key', regex: /eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+/ }
+];
+
+function scanForExposedSecrets(files) {
+  console.log(`\n🛡️ Ejecutando escáner de secretos (Secret Scanner) sobre ${files.length} archivos...`);
+  const leaks = [];
+
+  for (const file of files) {
+    // Solo escanear archivos de texto/código (omitir imágenes o binarios)
+    const ext = path.extname(file.fullPath).toLowerCase();
+    if (['.png', '.jpg', '.jpeg', '.gif', '.ico', '.pdf', '.docx', '.xlsx', '.pptx'].includes(ext)) {
+      continue;
+    }
+
+    try {
+      const content = fs.readFileSync(file.fullPath, 'utf8');
+      const lines = content.split('\n');
+
+      for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+        const line = lines[lineNum];
+        // Ignorar líneas de ejemplo/plantillas
+        if (line.includes('AQUI_PEGA_TU') || line.includes('ejemplo') || line.includes('YOUR_TOKEN')) continue;
+
+        for (const pattern of SECRET_PATTERNS) {
+          if (pattern.regex.test(line)) {
+            leaks.push({
+              file: file.relativePath,
+              line: lineNum + 1,
+              secretType: pattern.name
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // Ignorar errores de lectura binaria
+    }
+  }
+
+  if (leaks.length > 0) {
+    console.error('\n🚨 ¡ALERTA DE SEGURIDAD CRÍTICA! Se detectaron posibles credenciales expuestas:');
+    leaks.forEach(leak => {
+      console.error(`   ❌ [${leak.secretType}] en ${leak.file} (Línea ${leak.line})`);
+    });
+    console.error('\n🛑 Subida cancelada automáticamente para proteger tus credenciales personales.');
+    process.exit(1);
+  }
+
+  console.log('✅ Escáner superado: 0 secretos expuestos.');
+}
+
 function shouldIgnore(fileName, stat) {
   const lower = fileName.toLowerCase();
   if (stat.isDirectory()) {
@@ -132,7 +188,8 @@ function shouldIgnore(fileName, stat) {
   return false;
 }
 
-function getWorkspaceFiles(dir, includeProjects = true, fileList = []) {
+// targetMode: 'team_only' (solo .agents, reglas, setup) | 'projects_only' (solo Projects/)
+function getWorkspaceFiles(dir, targetMode = 'team_only', fileList = []) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     const fullPath = path.join(dir, file);
@@ -141,12 +198,17 @@ function getWorkspaceFiles(dir, includeProjects = true, fileList = []) {
     if (shouldIgnore(file, stat)) continue;
 
     const relPath = path.relative(WORKSPACE_DIR, fullPath).replace(/\\/g, '/');
-    if (!includeProjects && relPath.startsWith('Projects/')) {
+
+    if (targetMode === 'team_only' && relPath.startsWith('Projects/')) {
       continue; // Excluir Projects/ para el repositorio de equipo
     }
 
+    if (targetMode === 'projects_only' && !relPath.startsWith('Projects/')) {
+      continue; // Excluir .agents/ y framework para el repositorio exclusivo de proyectos
+    }
+
     if (stat.isDirectory()) {
-      getWorkspaceFiles(fullPath, includeProjects, fileList);
+      getWorkspaceFiles(fullPath, targetMode, fileList);
     } else {
       fileList.push({
         fullPath,
@@ -260,17 +322,18 @@ async function pushToRepo(repoName, files, commitMessage) {
 
   console.log(`   📊 Resumen Delta: ${uploadedCount} subido(s), ${reusedCount} sin cambios.`);
 
-  // 4. Construcción incremental del árbol
-  console.log(`   🌳 Creando árbol de Git de forma incremental...`);
+  // 4. Construcción limpia del árbol de Git
+  console.log(`   🌳 Creando árbol de Git limpio de forma incremental...`);
   const BATCH_SIZE = 80;
-  let currentBaseTreeSha = parentTreeSha;
+  let currentBaseTreeSha = undefined; // Árbol limpio que solo contiene los archivos explícitos de este repositorio
 
   for (let b = 0; b < treeEntries.length; b += BATCH_SIZE) {
     const chunk = treeEntries.slice(b, b + BATCH_SIZE);
-    const chunkTreeData = await ghApi(`/repos/${OWNER}/${repoName}/git/trees`, 'POST', {
-      base_tree: currentBaseTreeSha,
-      tree: chunk
-    });
+    const body = currentBaseTreeSha 
+      ? { base_tree: currentBaseTreeSha, tree: chunk }
+      : { tree: chunk };
+      
+    const chunkTreeData = await ghApi(`/repos/${OWNER}/${repoName}/git/trees`, 'POST', body);
     currentBaseTreeSha = chunkTreeData.sha;
   }
 
@@ -293,15 +356,18 @@ async function pushToRepo(repoName, files, commitMessage) {
 }
 
 async function run() {
-  console.log('🔍 Escaneando archivos locales...');
+  console.log('🔍 Escaneando y clasificando archivos locales...');
 
-  // 1. Repositorio de Equipo (Solo agentes, sin Projects/)
-  const teamFiles = getWorkspaceFiles(WORKSPACE_DIR, false);
+  // 1. Repositorio de Equipo: SOLO framework (.agents/, setup.bat, guías). NUNCA Projects/
+  const teamFiles = getWorkspaceFiles(WORKSPACE_DIR, 'team_only');
   console.log(`📦 Archivos para el Repositorio de Equipo ('${TEAM_REPO}'): ${teamFiles.length}`);
 
-  // 2. Repositorio Privado (Completo: .agents/ + Projects/)
-  const privateFiles = getWorkspaceFiles(WORKSPACE_DIR, true);
-  console.log(`🔒 Archivos para el Repositorio Privado ('${PRIVATE_REPO}'): ${privateFiles.length}`);
+  // 2. Repositorio de Proyectos: SOLO Projects/. NUNCA .agents/ ni configuración del framework
+  const projectFiles = getWorkspaceFiles(WORKSPACE_DIR, 'projects_only');
+  console.log(`🔒 Archivos para el Repositorio Exclusivo de Proyectos ('${PRIVATE_REPO}'): ${projectFiles.length}`);
+
+  // 3. Ejecutar Escáner de Seguridad en todos los archivos antes de cualquier subida
+  scanForExposedSecrets(teamFiles.concat(projectFiles));
 
   try {
     const reposToSync = [
@@ -313,9 +379,9 @@ async function run() {
       },
       {
         name: PRIVATE_REPO,
-        files: privateFiles,
-        description: 'Respaldo Privado Completo de Proyectos SAP y Agentes HIBERUS',
-        message: 'Update private full workspace: .agents and Projects'
+        files: projectFiles,
+        description: 'Repositorio Privado Exclusivo de Proyectos y Entregables de Clientes SAP HIBERUS',
+        message: 'Update private customer projects and deliverables'
       }
     ];
 
@@ -324,9 +390,9 @@ async function run() {
       await pushToRepo(target.name, target.files, target.message);
     }
 
-    console.log('\n🎉 ¡PROCESO FINALIZADO CON ÉXITO!');
-    console.log(`- Repo Equipo (Limpio sin Projects): https://github.com/${OWNER}/${TEAM_REPO}`);
-    console.log(`- Repo Privado Personal: https://github.com/${OWNER}/${PRIVATE_REPO}`);
+    console.log('\n🎉 ¡PROCESO FINALIZADO CON ÉXITO Y AISLAMIENTO TOTAL!');
+    console.log(`- Repo 1 (Framework Equipo - Solo .agents/): https://github.com/${OWNER}/${TEAM_REPO}`);
+    console.log(`- Repo 2 (Privado Clientes - Solo Projects/): https://github.com/${OWNER}/${PRIVATE_REPO}`);
   } catch (err) {
     console.error('\n❌ Error durante la publicación:', err.message);
   }

@@ -56,6 +56,11 @@ function checkFioriQuality(appFolderPath) {
                     res.errors.push(`[${fileName}:L${lineNum}] Llamada síncrona bloqueante detectada (${syncPattern}). Las operaciones I/O y de carga de datos deben ser 100% asíncronas.`);
                 }
             });
+
+            // 1.2 Detección de encadenamiento inseguro de getModel() sin validación
+            if (/this\.getView\(\)\.getModel\([^)]*\)\s*\.\s*get(Property|Object|Data|Binding)/i.test(trimmed)) {
+                res.warnings.push(`[${fileName}:L${lineNum}] Acceso inseguro a modelo: 'this.getView().getModel(...).get...' sin comprobar si el modelo está definido. En ciclos tempranos como 'onInit', use 'this.getOwnerComponent().getModel(...)' o un helper con fallback.`);
+            }
         });
     }
 
@@ -141,6 +146,11 @@ function checkFioriQuality(appFolderPath) {
                     }
                 }
             });
+
+            // 2.6 Prohibición de estilos inline en controles XML de SAPUI5
+            if (/\bstyle="[^"]*"/i.test(trimmed) && !trimmed.includes('<html:') && !trimmed.includes('<core:HTML')) {
+                res.errors.push(`[${fileName}:L${lineNum}] Violación UI5: Atributo inline 'style="..."' no soportado en controles XML de SAPUI5. Use clases CSS en 'webapp/css/style.css'.`);
+            }
         });
     }
 

@@ -4,7 +4,7 @@ param(
 )
 
 Write-Host "Convirtiendo Markdown a HTML..."
-$tempHtml = [System.IO.Path]::ChangeExtension($OutputFilePath, ".html")
+$tempHtml = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "AGY_MD_" + [System.Guid]::NewGuid().ToString("N") + ".html")
 
 function Convert-MarkdownToHtml {
     param([string]$mdText)
@@ -318,11 +318,15 @@ try {
     # Formato 16 = wdFormatXMLDocument (.docx)
     # Escalar la imagen de cabecera corporativa al 100% del ancho imprimible (468 pt / 16.5 cm)
     if ($wordDoc.InlineShapes.Count -gt 0) {
-        $firstShape = $wordDoc.InlineShapes.Item(1)
-        if ($firstShape.Width -ne 468) {
-            $aspectRatio = $firstShape.Height / $firstShape.Width
-            $firstShape.Width = 468
-            $firstShape.Height = [Math]::Round(468 * $aspectRatio)
+        try {
+            $firstShape = $wordDoc.InlineShapes.Item(1)
+            if ($firstShape.Width -ne 468 -and $firstShape.Width -gt 0) {
+                $aspectRatio = [single]($firstShape.Height / $firstShape.Width)
+                $firstShape.Width = [single]468
+                $firstShape.Height = [single](468 * $aspectRatio)
+            }
+        } catch {
+            Write-Warning "No se pudo escalar la forma inicial: $_"
         }
     }
 

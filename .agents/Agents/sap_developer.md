@@ -53,6 +53,8 @@ Develop robust, scalable, and "Clean Core" compliant backend services alongside 
     2. Bootstrap 100% asíncrono con `data-sap-ui-oninit="module:.../init"`, `data-sap-ui-preload="async"` y `Component.create({ manifest: true, async: true })` en `init.js`.
     3. `manifest.json` con `"settings": { "async": true }` en el modelo `i18n`.
     4. Layouts semánticos (`layout:Grid`, `VBox` con `<Title level="H6">` o `<Text>`) para campos informativos o KPIs de solo lectura, evitando `<Label>` huérfanos de formularios.
+    5. Prohibición estricta de atributos inline `style="..."` en controles XML de SAPUI5 (usar clases CSS en `webapp/css/style.css`).
+    6. Acceso seguro y resiliente a modelos en el ciclo de vida (`onInit`): evitar `this.getView().getModel(...).getProperty(...)` encadenado directo; usar `this.getOwnerComponent().getModel(...)` o helpers con fallback síncrono.
 - Priorizar Fiori Elements estándar sobre código custom. Justificar explícitamente cualquier uso de Freestyle.
 - Proporcionar mock data (`localService/`) junto con toda app generada.
 
