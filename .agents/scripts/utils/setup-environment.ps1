@@ -47,10 +47,30 @@ if (Test-Path $workspaceAgentsMd) {
 # 3.1. Asegurar plantilla base de mcp_config.json si no existe
 $mcpConfigFile = Join-Path $geminiIdeDir "mcp_config.json"
 if (-not (Test-Path $mcpConfigFile)) {
-    Write-Host "Generando plantilla base mcp_config.json..." -ForegroundColor Gray
+    Write-Host "Generando plantilla base mcp_config.json con suite MCP SAP completa..." -ForegroundColor Gray
     $mcpTemplate = @'
 {
   "mcpServers": {
+    "sap-docs-hosted": {
+      "serverUrl": "https://mcp-sap-docs.marianzeis.de/mcp"
+    },
+    "abap-mcp-hosted": {
+      "serverUrl": "https://mcp-abap.marianzeis.de/mcp"
+    },
+    "sap-ui5": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@ui5/mcp-server"
+      ]
+    },
+    "cds-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@cap-js/mcp-server"
+      ]
+    },
     "github-mcp-server": {
       "command": "npx",
       "args": [
@@ -65,7 +85,7 @@ if (-not (Test-Path $mcpConfigFile)) {
 }
 '@
     Set-Content -Path $mcpConfigFile -Value $mcpTemplate -Encoding UTF8
-    Write-Host "   -> Creado mcp_config.json listo para configurar tu token de GitHub" -ForegroundColor Green
+    Write-Host "   -> Creado mcp_config.json con los 5 servidores MCP listos para usar" -ForegroundColor Green
 }
 
 # 4. Verificar presencia de componentes clave

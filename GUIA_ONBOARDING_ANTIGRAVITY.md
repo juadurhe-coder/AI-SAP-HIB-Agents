@@ -116,6 +116,26 @@ Para que el sistema pueda consultar actualizaciones del equipo automáticamente 
 ```json
 {
   "mcpServers": {
+    "sap-docs-hosted": {
+      "serverUrl": "https://mcp-sap-docs.marianzeis.de/mcp"
+    },
+    "abap-mcp-hosted": {
+      "serverUrl": "https://mcp-abap.marianzeis.de/mcp"
+    },
+    "sap-ui5": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@ui5/mcp-server"
+      ]
+    },
+    "cds-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@cap-js/mcp-server"
+      ]
+    },
     "github-mcp-server": {
       "command": "npx",
       "args": [
@@ -130,7 +150,14 @@ Para que el sistema pueda consultar actualizaciones del equipo automáticamente 
 }
 ```
 
-6. Reemplaza las letras `AQUI_PEGA_TU_TOKEN_GHP` por la clave que copiaste en GitHub (manteniendo las comillas `""`).
+> **¿Qué hace cada servidor MCP configurado?**
+> - **`sap-docs-hosted`**: Permite al agente buscar al instante documentación oficial de SAP, ejemplos de Fiori, guías Clean ABAP y soluciones en SAP Community.
+> - **`abap-mcp-hosted`**: Valida que las APIs y CDS Views que usemos cumplan con Clean Core (Released APIs Nivel A).
+> - **`sap-ui5`**: Pasa linters oficiales de SAP (`@ui5/linter`) sobre tus aplicaciones Fiori locales.
+> - **`cds-mcp`**: Asiste en el modelado CDS y desarrollo de servicios CAP.
+> - **`github-mcp-server`**: Permite sincronizar y consultar código en GitHub.
+
+6. Reemplaza únicamente las letras `AQUI_PEGA_TU_TOKEN_GHP` por la clave que copiaste en GitHub (manteniendo las comillas `""`).
 7. Pulsa `Ctrl + G` (o `Archivo > Guardar`) y cierra el Bloc de Notas.
 
 ---
