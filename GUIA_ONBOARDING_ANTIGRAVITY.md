@@ -74,17 +74,32 @@ Tienes 2 opciones para descargar el proyecto. Elige la que te resulte más cómo
 
 ---
 
-## 📌 PASO 4: Puesta a Punto en 1 Solo Clic (`setup.bat`)
+## 📌 PASO 4: Puesta a Punto con `setup.bat` / `setup-environment.ps1`
 
-Una vez tengas la carpeta `AI-SAP-HIB-Agents` en tu equipo:
+El proyecto incluye un script de inicialización automática (**`setup-environment.ps1`**) que configura todo tu entorno local en 2 segundos sin que tengas que copiar carpetas a mano.
 
-1. Abre el **Explorador de Archivos de Windows** y entra en la carpeta del proyecto.
-2. Busca un archivo llamado **`setup.bat`** (o `setup`).
+Tienes 2 formas de ejecutarlo:
+
+### Opción 1 (Recomendada: 1 Clic con `setup.bat`):
+1. Abre el **Explorador de Archivos de Windows** y entra en la carpeta del proyecto (`AI-SAP-HIB-Agents`).
+2. Busca el archivo **`setup.bat`** (o `setup`).
 3. Haz **doble clic** sobre él.
-4. Se abrirá una ventana negra que trabajará automáticamente durante 2 o 3 segundos.
-5. Cuando veas un mensaje con letras verdes que dice **`🎉 ¡ENTORNO CONFIGURADO Y LISTO PARA USAR!`**, pulsa cualquier tecla de tu teclado para cerrar la ventana.
+4. Se abrirá una ventana de comandos que ejecutará internamente el script `setup-environment.ps1`.
+5. Cuando veas el mensaje en verde **`🎉 ¡ENTORNO CONFIGURADO Y LISTO PARA USAR!`**, pulsa cualquier tecla para cerrar la ventana.
 
-¡Ya está configurada la estructura global de los agentes en tu perfil local!
+### Opción 2 (Desde PowerShell para usuarios avanzados):
+Abre una terminal PowerShell dentro de la carpeta y ejecuta:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\.agents\scripts\utils\setup-environment.ps1
+```
+
+---
+
+> ⚙️ **¿Qué hace automáticamente `setup-environment.ps1` por ti?**
+> 1. Crea las carpetas globales de Antigravity en tu perfil de Windows (`%USERPROFILE%\.gemini\config` y `%USERPROFILE%\.gemini\antigravity-ide`).
+> 2. Copia y registra la regla global **`AGENTS.md`** en tu sistema para habilitar el Orquestador Multi-Agente.
+> 3. Genera la plantilla base **`mcp_config.json`** con los **5 servidores MCP de SAP** listos para funcionar.
+> 4. Comprueba la integridad de la Constitución, los 5 Agentes, Workflows y Scripts de gobierno.
 
 ---
 
