@@ -266,15 +266,15 @@ $content = $content -replace '<div style="page-break-before: always;"></div>', '
 $content = $content -replace '<div style="page-break-before: always;"><\/div>', '<br style="page-break-before: always;" class="MSOWordPageBreak" />'
 
 # Sanitizar símbolos matemáticos LaTeX comunes a caracteres Unicode limpios
-$content = $content -replace '\$\\rightarrow\$', '→'
-$content = $content -replace '\\rightarrow', '→'
-$content = $content -replace '\$\\leftarrow\$', '←'
-$content = $content -replace '\\leftarrow', '←'
-$content = $content -replace '\$\\Rightarrow\$', '➔'
-$content = $content -replace '\\Rightarrow', '➔'
-$content = $content -replace '\$\\le\$', '≤'
-$content = $content -replace '\$\\ge\$', '≥'
-$content = $content -replace '\$\\neq\$', '≠'
+$content = $content.Replace('$\rightarrow$', [string][char]0x2192)
+$content = $content.Replace('\rightarrow', [string][char]0x2192)
+$content = $content.Replace('$\leftarrow$', [string][char]0x2190)
+$content = $content.Replace('\leftarrow', [string][char]0x2190)
+$content = $content.Replace('$\Rightarrow$', [string][char]0x2794)
+$content = $content.Replace('\Rightarrow', [string][char]0x2794)
+$content = $content.Replace('$\le$', [string][char]0x2264)
+$content = $content.Replace('$\ge$', [string][char]0x2265)
+$content = $content.Replace('$\neq$', [string][char]0x2260)
 
 
 # Si el markdown contiene una cabecera, se usará. Si no, se inyecta la corporativa por defecto

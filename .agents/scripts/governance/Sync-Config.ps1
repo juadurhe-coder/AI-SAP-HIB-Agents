@@ -38,7 +38,7 @@ try {
     }
 
     # 2. Sincronizar regla global local
-    $workspacePath = Resolve-Path "$PSScriptRoot\..\.."
+    $workspacePath = (Resolve-Path "$PSScriptRoot\..\..\..").Path
     $geminiConfigDir = Join-Path $env:USERPROFILE ".gemini\config"
     
     if (-not (Test-Path $geminiConfigDir)) {
@@ -51,6 +51,8 @@ try {
     if (Test-Path $workspaceAgentsMd) {
         Copy-Item -Path $workspaceAgentsMd -Destination $globalAgentsMd -Force
         Write-Host "Regla global AGENTS.md sincronizada en: $globalAgentsMd" -ForegroundColor Green
+    } else {
+        Write-Host "No se encontro el archivo $workspaceAgentsMd" -ForegroundColor Yellow
     }
 
     Write-Host ""
