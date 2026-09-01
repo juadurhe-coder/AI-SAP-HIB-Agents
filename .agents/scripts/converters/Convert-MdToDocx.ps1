@@ -152,36 +152,48 @@ $styleBlock = @"
     body {
         font-family: 'Calibri', 'Arial', sans-serif;
         color: #333333;
-        line-height: 1.5;
-        font-size: 11pt;
+        line-height: 1.35;
+        font-size: 10.5pt;
     }
     h1, h2, h3, h4, h5, h6 {
         color: #2E74B5;
         font-family: 'Calibri Light', 'Arial', sans-serif;
         font-weight: bold;
-        margin-top: 18pt;
-        margin-bottom: 6pt;
+        margin-top: 10pt;
+        margin-bottom: 3pt;
     }
     h1 {
-        font-size: 20pt;
-        border-bottom: 2px solid #2E74B5;
-        padding-bottom: 4px;
-        margin-top: 24pt;
+        font-size: 16pt;
+        border-bottom: 1.5px solid #2E74B5;
+        padding-bottom: 2px;
+        margin-top: 6pt;
+        margin-bottom: 3pt;
     }
     h2 {
-        font-size: 16pt;
+        font-size: 13pt;
         border-bottom: 1px solid #D3D3D3;
-        padding-bottom: 3px;
-        margin-top: 20pt;
+        padding-bottom: 2px;
+        margin-top: 10pt;
+        margin-bottom: 3pt;
     }
     h3 {
-        font-size: 13pt;
-        margin-top: 16pt;
+        font-size: 11.5pt;
+        margin-top: 8pt;
+        margin-bottom: 2pt;
+    }
+    p {
+        margin-top: 2pt;
+        margin-bottom: 3pt;
+    }
+    hr {
+        margin: 4pt 0;
+        border: 0;
+        border-top: 1px solid #2E74B5;
     }
     table {
         border-collapse: collapse;
         width: 100%;
-        margin: 8pt 0;
+        margin: 4pt 0 6pt 0;
         font-family: 'Calibri', sans-serif;
         line-height: 1.15;
     }
@@ -190,31 +202,31 @@ $styleBlock = @"
         color: #ffffff;
         font-weight: bold;
         text-align: left;
-        padding: 4px 6px;
+        padding: 3pt 5pt;
         border: 1px solid #1F4E79;
-        font-size: 9.5pt;
+        font-size: 9pt;
     }
     td {
-        padding: 4px 6px;
+        padding: 2.5pt 5pt;
         border: 1px solid #D3D3D3;
-        font-size: 9pt;
-        vertical-align: top;
+        font-size: 8.5pt;
+        vertical-align: middle;
     }
     tr:nth-child(even) td {
         background-color: #F9FBFD;
     }
     blockquote {
-        margin: 10pt 0 10pt 15pt;
-        border-left: 4.5pt solid #2E74B5;
-        padding-left: 10pt;
+        margin: 6pt 0 6pt 10pt;
+        border-left: 3.5pt solid #2E74B5;
+        padding-left: 8pt;
         color: #555555;
         font-style: italic;
     }
     code {
         font-family: 'Consolas', 'Courier New', monospace;
         background-color: #F4F4F4;
-        padding: 2px 4px;
-        font-size: 9.5pt;
+        padding: 1px 3px;
+        font-size: 9pt;
         border: 1px solid #E0E0E0;
     }
     td code {
@@ -228,27 +240,42 @@ $styleBlock = @"
     pre {
         font-family: 'Consolas', 'Courier New', monospace;
         background-color: #F4F4F4;
-        padding: 10px;
+        padding: 6px;
         border: 1px solid #D3D3D3;
-        margin: 12pt 0;
+        margin: 6pt 0;
     }
     ul, ol {
-        margin-top: 4pt;
-        margin-bottom: 8pt;
-        padding-left: 20pt;
+        margin-top: 2pt;
+        margin-bottom: 4pt;
+        padding-left: 18pt;
     }
     li {
-        margin-bottom: 3pt;
+        margin-bottom: 2pt;
     }
 </style>
 "@
-$corporateHeaderPath = Join-Path $PSScriptRoot "..\resources\corporate_header.png"
+$corporateHeaderPath = Join-Path $PSScriptRoot "..\..\resources\corporate_header.png"
+if (-not (Test-Path $corporateHeaderPath)) {
+    $corporateHeaderPath = Join-Path $PSScriptRoot "..\resources\corporate_header.png"
+}
 
 # Reemplazar de forma robusta los marcadores de salto de página por la clase nativa de Word
 $content = $content -replace '<p>\[PAGE_BREAK\]</p>', '<br style="page-break-before: always;" class="MSOWordPageBreak" />'
 $content = $content -replace "\[PAGE_BREAK\]", '<br style="page-break-before: always;" class="MSOWordPageBreak" />'
 $content = $content -replace '<div style="page-break-before: always;"></div>', '<br style="page-break-before: always;" class="MSOWordPageBreak" />'
 $content = $content -replace '<div style="page-break-before: always;"><\/div>', '<br style="page-break-before: always;" class="MSOWordPageBreak" />'
+
+# Sanitizar símbolos matemáticos LaTeX comunes a caracteres Unicode limpios
+$content = $content -replace '\$\\rightarrow\$', '→'
+$content = $content -replace '\\rightarrow', '→'
+$content = $content -replace '\$\\leftarrow\$', '←'
+$content = $content -replace '\\leftarrow', '←'
+$content = $content -replace '\$\\Rightarrow\$', '➔'
+$content = $content -replace '\\Rightarrow', '➔'
+$content = $content -replace '\$\\le\$', '≤'
+$content = $content -replace '\$\\ge\$', '≥'
+$content = $content -replace '\$\\neq\$', '≠'
+
 
 # Si el markdown contiene una cabecera, se usará. Si no, se inyecta la corporativa por defecto
 if ((Test-Path $corporateHeaderPath) -and ($content -notmatch "header_image\.png" -and $content -notmatch "corporate_header\.png")) {

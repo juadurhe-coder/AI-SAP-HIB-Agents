@@ -176,6 +176,20 @@ runTest('16. Fiori: Verificación cruzada de claves i18n entre vistas XML y bund
     assert.strictEqual(i18nErrors.length, 0, 'No debería haber claves i18n faltantes en app válida');
 });
 
+// 17. Fiori ButtonType Validation (Invalid)
+runTest('17. Fiori: Botón con type="Positive" o "Negative" en vista XML debe fallar', () => {
+    const invalidFioriApp = path.join(fixturesDir, 'fiori-invalid');
+    const res = checkFioriQuality(invalidFioriApp);
+    assert(res.errors.some(e => e.includes('sap.m.ButtonType') || e.includes('Tipo de botón inválido')), 'Debería detectar type="Positive" o "Negative"');
+});
+
+// 18. Fiori Flexibility Bundle Schema Validation
+runTest('18. Fiori: Bundle de flexibilidad con array plano [] debe fallar', () => {
+    const invalidFioriApp = path.join(fixturesDir, 'fiori-invalid');
+    const res = checkFioriQuality(invalidFioriApp);
+    assert(res.errors.some(e => e.includes('bundle de flexibilidad')), 'Debería exigir objeto con changes[]');
+});
+
 console.log('\n========================================================================');
 console.log(` 📊 RESULTADO: ${passedTests}/${totalTests} pruebas superadas.`);
 console.log('========================================================================\n');

@@ -14,5 +14,11 @@ Todas las respuestas, entregables y cambios de rol deben respetar estrictamente 
 Para tareas específicas, el Master Orchestrator adoptará el rol del sub-agente especializado correspondiente en `.agents/Agents/`:
 - **`intake_solution_architect.md`**: Triaje de solicitudes, completitud de input, propuestas de solución CxO y RFPs.
 - **`funcional_architect.md`**: Especificaciones funcionales (FS), Fit-to-Standard, parametrización SPRO y diagramas BPMN.
-- **`sap_developer.md`**: Desarrollo Full-Stack SAP (ABAP Cloud, RAP, CAP, OData V4, Fiori Elements y SAPUI5).
+- **`sap_developer.md`**: Desarrollo Full-Stack SAP (ABAP Cloud, RAP, CAP, OData V4, Fiori Elements, SAPUI5 y conversión de mockups con `/export_to_fiori`).
 - **`pmo_delivery_manager.md`**: Gobernanza QA, Quality Gates, exportaciones Office (`/export_to_*`) y gestión de Kanban/Daily (`/daily`).
+
+## 4. QUALITY GATES TÉCNICOS OBLIGATORIOS
+Antes de entregar cualquier app Fiori/SAPUI5, el agente DEBE cumplir el checklist definido en:
+- Referencia: [.agents/Rules/fiori_quality_gate.md](Rules/fiori_quality_gate.md)
+- Workflow de Generación: [.agents/workflows/export_to_fiori.md](workflows/export_to_fiori.md)
+

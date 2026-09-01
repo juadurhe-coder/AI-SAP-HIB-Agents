@@ -53,10 +53,13 @@ Develop robust, scalable, and "Clean Core" compliant backend services alongside 
     2. Bootstrap 100% asíncrono con `data-sap-ui-oninit="module:.../init"`, `data-sap-ui-preload="async"` y `Component.create({ manifest: true, async: true })` en `init.js`.
     3. `manifest.json` con `"settings": { "async": true }` en el modelo `i18n`.
     4. Layouts semánticos (`layout:Grid`, `VBox` con `<Title level="H6">` o `<Text>`) para campos informativos o KPIs de solo lectura, evitando `<Label>` huérfanos de formularios.
-    5. Prohibición estricta de atributos inline `style="..."` en controles XML de SAPUI5 (usar clases CSS en `webapp/css/style.css`).
-    6. Acceso seguro y resiliente a modelos en el ciclo de vida (`onInit`): evitar `this.getView().getModel(...).getProperty(...)` encadenado directo; usar `this.getOwnerComponent().getModel(...)` o helpers con fallback síncrono.
-- Priorizar Fiori Elements estándar sobre código custom. Justificar explícitamente cualquier uso de Freestyle.
-- Proporcionar mock data (`localService/`) junto con toda app generada.
+    5. Prohibición estricta de atributos inline 'style="..."' en controles XML de SAPUI5 (usar clases CSS en 'webapp/css/style.css').
+    6. Acceso seguro y resiliente a modelos en el ciclo de vida ('onInit'): evitar 'this.getView().getModel(...).getProperty(...)' encadenado directo; usar 'this.getOwnerComponent().getModel(...)' o helpers con fallback síncrono.
+    7. Enumeraciones estrictas de controles: Validar que los valores de 'type' en botones correspondan a 'sap.m.ButtonType' ('Accept', 'Reject', 'Emphasized', 'Transparent', 'Default'). NUNCA usar 'Positive' o 'Negative' en 'sap.m.Button'.
+    8. Entradas numéricas con formateador de decimales: Usar '<Input type="Text" textAlign="End">' junto con formateador 'sap.ui.model.type.Float' para evitar advertencias de parsing en navegadores con comas decimales ('es-ES', 'de-DE').
+    9. Inicialización declarativa estándar: Usar 'data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"' y '<div data-sap-ui-component>' en 'index.html' para evitar dependencias innecesarias de servicios de Launchpad en modo local.
+    10. Matriz de selección arquitectónica: Usar Fiori Elements Floorplans para CRUD directo sobre OData V4 en Launchpad; usar Fiori Freestyle con 'sap.f.DynamicPage' y controles SAPUI5 oficiales cuando se requieran simulaciones cliente en tiempo real, KPIs en cabecera y modales de cálculo complejo.
+- Proporcionar mock data ('localService/') junto con toda app generada.
 
 ### 4. Matriz de Selección de Herramientas MCP SAP & Eficiencia
 Seleccionar la herramienta especializada según la necesidad de desarrollo:

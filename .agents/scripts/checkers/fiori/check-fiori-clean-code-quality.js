@@ -70,8 +70,8 @@ function checkFioriQuality(appFolderPath) {
         const rawContent = fs.readFileSync(filePath, 'utf-8');
         const codeOnly = rawContent.replace(/\/\/.*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
 
-        if (!codeOnly.includes('sap/ui/core/UIComponent')) {
-            res.errors.push(`[${fileName}] Estructura Component.js: El componente raíz debe extender 'sap/ui/core/UIComponent'.`);
+        if (!codeOnly.includes('sap/ui/core/UIComponent') && !codeOnly.includes('sap/fe/core/AppComponent') && !codeOnly.includes('sap/suite/ui/generic/template/lib/AppComponent')) {
+            res.errors.push(`[${fileName}] Estructura Component.js: El componente raíz debe extender 'sap/ui/core/UIComponent' o 'sap/fe/core/AppComponent'.`);
         }
 
         const hasManifestMetadata = /metadata\s*:\s*\{[^}]*manifest\s*:\s*["']json["']/i.test(codeOnly);
@@ -150,6 +150,16 @@ function checkFioriQuality(appFolderPath) {
             // 2.6 Prohibición de estilos inline en controles XML de SAPUI5
             if (/\bstyle="[^"]*"/i.test(trimmed) && !trimmed.includes('<html:') && !trimmed.includes('<core:HTML')) {
                 res.errors.push(`[${fileName}:L${lineNum}] Violación UI5: Atributo inline 'style="..."' no soportado en controles XML de SAPUI5. Use clases CSS en 'webapp/css/style.css'.`);
+            }
+
+            // 2.7 Validación de sap.m.ButtonType
+            if (/<(?:[a-zA-Z0-9_]+:)?Button\b[^>]*\btype="(Positive|Negative)"/i.test(trimmed)) {
+                res.errors.push(`[${fileName}:L${lineNum}] Tipo de botón inválido: 'type="Positive"' / 'type="Negative"' no existe en 'sap.m.ButtonType'. Use 'type="Accept"' (verde) o 'type="Reject"' (rojo).`);
+            }
+
+            // 2.8 Incompatibilidad de Input type="Number" con formateador Float en locales con coma
+            if (/<(?:[a-zA-Z0-9_]+:)?Input\b[^>]*\btype="Number"[^>]*\b(?:type:\s*['"]sap\.ui\.model\.type\.Float['"]|formatOptions)/i.test(trimmed)) {
+                res.warnings.push(`[${fileName}:L${lineNum}] Incompatibilidad de formato: '<Input type="Number"' con formateador 'type.Float' provoca advertencias de parsing en navegadores con comas decimales (ej. '10,0'). Use 'type="Text"' con 'textAlign="End"'.`);
             }
         });
     }
@@ -397,6 +407,20 @@ function checkFioriQuality(appFolderPath) {
     } else if (fs.existsSync(pkgInParent)) {
         checkPackageJson(pkgInParent, results);
     }
+
+    // Auditoría de bundles de flexibilidad
+    const flexBundleFiles = scanFilesRecursively(appFolderPath, name => /^(changes|flexibility)-bundle\.json$/i.test(name), ['node_modules', 'dist', '.git']);
+    flexBundleFiles.forEach(fbf => {
+        try {
+            const raw = fs.readFileSync(fbf, 'utf-8');
+            const data = JSON.parse(raw);
+            if (Array.isArray(data)) {
+                results.errors.push(`[${path.basename(fbf)}] Estructura inválida: El bundle de flexibilidad no puede ser un array plano '[]'. Debe ser un objeto con '{ "changes": [], "compVariants": [], "variants": [] }' para evitar excepciones en 'StaticFileConnector'.`);
+            }
+        } catch (e) {
+            results.errors.push(`[${path.basename(fbf)}] Archivo JSON de flexibilidad corrupto o inválido (${e.message}).`);
+        }
+    });
 
     if (results.errors.length > 0) {
         results.passed = false;

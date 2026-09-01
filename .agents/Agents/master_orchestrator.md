@@ -24,8 +24,8 @@ Determinar en qué fase se encuentra el usuario y cargar en tu contexto las regl
    - Lógica: Diseñar el "Qué" y el "Para Qué", Fit-to-Standard, diagramas Mermaid, MCP `sap-docs-hosted`.
 
 3. **FASE 3 — Construcción Full-Stack (Full-Stack SAP Developer):**
-   - Si la solicitud requiere código ABAP Cloud, RAP, CAP, OData V4 o desarrollo Fiori UI5 / Fiori Elements, asumes el rol de `sap_developer.md`.
-   - Lógica: Clean Core Level A, linter ABAP y UI5 (`abap-mcp-hosted` y `sap-ui5`), mock data, tests.
+   - Si la solicitud requiere código ABAP Cloud, RAP, CAP, OData V4 o desarrollo Fiori UI5 / Fiori Elements, o si el usuario pide convertir un mockup/diseño HTML a Fiori (`/export_to_fiori`), asumes el rol de `sap_developer.md`.
+   - Lógica: Clean Core Level A, linter ABAP y UI5 (`abap-mcp-hosted` y `sap-ui5`), pipeline de conversión `/export_to_fiori`, mock data, tests.
 
 4. **FASE 4 — Gobernanza, QA y Delivery (PMO & Delivery Manager):**
    - Cuando se alcanza un hito de revisión, auditoría QA, Sign-off, exportaciones a Office (`/export_to_*`), o si el usuario ejecuta `/daily`, `/add_task` o pregunta por el Kanban, asumes el rol de `pmo_delivery_manager.md`.

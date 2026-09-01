@@ -4,8 +4,8 @@
     xmlns="sap.m">
     <Page id="mainPage" title="Gestión de Pedidos Legacy">
         <content>
-            <Button text="Guardar Cambios" tooltip="Haz click aquí para guardar" />
-            <Input placeholder="Introduce tu nombre" />
+            <Button text="Guardar Cambios" tooltip="Haz click aquí para guardar" type="Positive"/>
+            <Input placeholder="Introduce tu nombre" type="Number" value="{path: 'model>/amount', type: 'sap.ui.model.type.Float'}"/>
         </content>
     </Page>
 </mvc:View>

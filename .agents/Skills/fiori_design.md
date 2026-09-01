@@ -28,7 +28,40 @@
 
 ---
 
-## 2. ANNOTATIONS CDS PARA UI — PATRÓN BÁSICO
+## 2. PATRÓN FREESTYLE AVANZADO: `sap.f.DynamicPage` CON KPIS Y CÁLCULO EN VIVO
+
+Cuando una aplicación requiera interactividad no cubierta por Floorplans estándar (como simulaciones matemáticas cliente, tarjetas KPI visuales en cabecera y modales de auditoría de fórmulas):
+
+```xml
+<f:DynamicPage id="dynamicPage" headerExpanded="true" fitContent="true" showFooter="true">
+    <f:title>
+        <f:DynamicPageTitle>
+            <f:heading>
+                <HBox alignItems="Center">
+                    <Title text="{i18n>pageTitle}" level="H2"/>
+                    <ObjectStatus text="{i18n>cleanCoreLevelA}" state="Success" inverted="true"/>
+                </HBox>
+            </f:heading>
+            <f:actions>
+                <Button text="{i18n>btnAction}" icon="sap-icon://simulate" type="Emphasized" press="onExecute"/>
+                <Button text="{i18n>btnGenerate}" icon="sap-icon://accept" type="Accept" press="onGenerate"/>
+            </f:actions>
+        </f:DynamicPageTitle>
+    </f:title>
+    <f:header>
+        <f:DynamicPageHeader pinnable="true">
+            <!-- KPI Summary Cards + Filter Toolbar -->
+        </f:DynamicPageHeader>
+    </f:header>
+    <f:content>
+        <!-- Interactive Table with live calculation & audit dialog fragments -->
+    </f:content>
+</f:DynamicPage>
+```
+
+---
+
+## 3. ANNOTATIONS CDS PARA UI — PATRÓN BÁSICO
 
 Todo servicio OData V4 consumido por Fiori Elements DEBE tener estas annotations en la Consumption CDS View (`ZC_*`):
 
@@ -52,7 +85,7 @@ Todo servicio OData V4 consumido por Fiori Elements DEBE tener estas annotations
 
 ---
 
-## 3. HERRAMIENTAS MCP OBLIGATORIAS
+## 4. HERRAMIENTAS MCP OBLIGATORIAS
 
 | Herramienta | Cuándo | Por qué |
 |-------------|--------|---------|
@@ -64,9 +97,12 @@ Todo servicio OData V4 consumido por Fiori Elements DEBE tener estas annotations
 
 ---
 
-## 4. REGLAS TÉCNICAS
+## 5. REGLAS TÉCNICAS Y CONTROL DE CONTROLES
 
-- **OData V4** obligatorio. No usar V2 en proyectos nuevos.
-- **CSS custom mínimo**: Preferir temas estándar (Horizon, Quartz). Solo CSS custom si es imprescindible para branding.
-- **Internacionalización (i18n)**: Todo texto visible DEBE estar en archivos `i18n.properties`, nunca hardcodeado.
-- **Flexibility**: Usar UI5 Flexibility / Adaptation Projects para cambios menores en apps estándar antes de crear apps custom.
+- **OData V4** obligatorio en nuevos servicios de backend.
+- **Enumeraciones Estrictas**: En botones `sap.m.Button`, usar `type="Accept"` (verde), `type="Reject"` (rojo), `type="Emphasized"` (azul). NUNCA usar `Positive`/`Negative`.
+- **Formateo de Números en Inputs**: Usar `<Input type="Text" textAlign="End">` con formateador `sap.ui.model.type.Float` para evitar incompatibilidad con comas decimales (`10,0`) en navegadores locales.
+- **Arranque Declarativo**: Usar `data-sap-ui-on-init="module:sap/ui/core/ComponentSupport"` y `<div data-sap-ui-component>` en `index.html`.
+- **Flexibility Bundles**: Estructurar `changes-bundle.json` como objeto `{ "changes": [], "compVariants": [], "variants": [] }`, nunca como array plano `[]`.
+- **CSS custom desacoplado**: Prohibición de atributos inline `style="..."` en controles XML. Usar clases en `webapp/css/style.css`.
+- **Internacionalización (i18n)**: Todo texto visible DEBE residir en archivos `i18n.properties`, nunca hardcodeado.

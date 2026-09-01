@@ -41,6 +41,12 @@ Una promesa verbal en el chat **tiene valor de cumplimiento cero**. Si el agente
 - **Prohibición de Actualización en Cascada:** Está estrictamente **PROHIBIDO** modificar o re-escribir archivos de propuestas presentadas o entregables de fases pasadas para alinear sus detalles con nuevas decisiones tomadas en la fase activa. Todas las nuevas decisiones técnicas o funcionales deben registrarse **únicamente** en los documentos de la fase activa actual (ej: `03_FS_*`) y en el archivo `00_Project_Memory.md` del proyecto.
 - **Excepción Única:** Solo se autoriza modificar un documento congelado si el usuario lo solicita de manera explícita y directa en el prompt (ej: *"Actualiza la propuesta 01_PR con X"*).
 
+### 3.5 PRE-CHECK OBLIGATORIO DE NOMENCLATURA DE FICHEROS (Gatekeeper de Escritura)
+- **Prohibición de Creación sin Patrón Oficial:** El agente TIENE PROHIBIDO ejecutar `write_to_file` para crear cualquier entregable (`.md`, `.docx`, `.pptx`, `.xlsx`, `.html`) en `Projects/` sin antes verificar que el nombre del fichero cumple estrictamente la fórmula:
+  `[TICKET_O_PROYECTO]_{CODIGO_FASE}_{TIPO}_{DESCRIPCION}_v{VERSION}.{EXT}` (ej: `[114491]_03_FS_T184_Determination_CR_ZIT_v1.0.md`).
+- **Verificación de Ticket:** Si el usuario no ha especificado el número de ticket o ID de proyecto en la petición, el agente DEBE preguntar explícitamente por él antes de escribir el archivo o utilizar estrictamente el marcador `[XXXXX]`.
+- **Infracción Grave:** Crear un archivo de entregable como `FS_...md`, `Propuesta.docx` o sin prefijo entre corchetes se considera una violación directa de esta Constitución.
+
 ## 4. PROTOCOLO DE COMUNICACIÓN HUMANO-AGENTE
 Todos los agentes del ecosistema DEBEN aplicar los protocolos definidos en `Skills/communication_protocols.md`:
 - Regla de Parada: Si falta >30% de información obligatoria, el agente se detiene y pregunta antes de avanzar. Nunca se genera un entregable completo con información insuficiente.
@@ -79,6 +85,7 @@ Antes de responder a cualquier pregunta del usuario que involucre **al menos uno
 - Scope Items, Best Practices o documentación de SAP Activate.
 - Transacciones, reportes o programas estándar SAP cuyo propósito exacto no sea trivial.
 - Cualquier afirmación que incluya "según la nota SAP...", "SAP recomienda..." o "en la documentación oficial...".
+- Diagnóstico o troubleshooting de procesos SAP (ej. "¿por qué no se bloquea el pedido?", "¿por qué no se actualiza la exposición crediticia?") donde la respuesta dependa de tablas, campos, configuración SPRO o lógica estándar del sistema. El agente **DEBE** consultar el MCP **antes del primer turno de respuesta**, no esperar a que el usuario detecte errores para verificar.
 
 ### 6.2 MCP SERVERS DISPONIBLES Y SU USO
 | MCP Server | Herramientas Clave | Cuándo Usar |
